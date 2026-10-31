@@ -1,5 +1,5 @@
 // 更新網站內容後，把這個版本號加 1，大家的手機就會抓到新版
-const CACHE = 'keepsake-v2';
+const CACHE = 'keepsake-v3';
 const CORE = ['./', './index.html', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png'];
 
