@@ -1,343 +1,1009 @@
 <!doctype html>
-<html lang="ja">
+<html lang="zh-Hant-TW">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>残り色</title>
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=5">
-<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png?v=5">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=5">
-<meta name="apple-mobile-web-app-title" content="残り色">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Keepsake</title>
+<meta name="description" content="導入照片，只留下想要的顏色、畫上手繪花邊、貼圖和文字，加上拍立得外框，再存回相簿。">
+<meta name="theme-color" content="#1c1a1f">
+<meta name="color-scheme" content="dark">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#ffffff">
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Space+Mono&family=Courier+Prime&family=DM+Mono:wght@400&family=Playfair+Display:wght@500&family=Josefin+Sans:wght@500&family=Caveat:wght@500&family=Shadows+Into+Light&family=Playwrite+AR+Guides&display=swap">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keepsake">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Huninn&family=Caveat:wght@500;700&family=IBM+Plex+Mono:wght@500&family=Space+Mono&family=Courier+Prime&family=DM+Mono&family=Playfair+Display:wght@500&family=Josefin+Sans:wght@500&family=Shadows+Into+Light&family=Playwrite+AR+Guides&display=swap">
 <style>
-/* Layout: darkroom bench — photo on the left as the working print, a narrow control strip on the right; stacks on phones. Accent follows the picked colour. */
+/* Layout: one-screen phone photo editor — slim header, photo stage in the middle, option tray + eight-tool bar docked at the bottom; on wide screens the tray becomes a side panel. Single warm-dark "darkroom" look on purpose so photos and doodle colors pop. */
 :root{
-  --bg:#ecebe8; --panel:#f7f6f3; --fg:#1d1c1a; --muted:#6b6862; --line:#d5d2cc; --well:#dedbd5;
-  --accent:#d0342c;
-  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --bg:#1c1a1f; --tray:#262329; --chip:#322e36; --line:#423d47;
+  --fg:#f4ede4; --muted:#a79eac; --accent:#f6d24a; --pink:#f28bb5; --danger:#e0546f;
+  --hand:"LXGW WenKai TC","Kaiti TC","STKaiti","KaiTi",cursive;
+  --sans:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  color-scheme:dark;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151514;--panel:#1e1e1c;--fg:#ecebe7;--muted:#9a978f;--line:#33322f;--well:#0d0d0c;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#151514;--panel:#1e1e1c;--fg:#ecebe7;--muted:#9a978f;--line:#33322f;--well:#0d0d0c;color-scheme:dark}
-html,body{background:var(--bg);color:var(--fg)}
-body{font-family:var(--sans);font-size:15px;line-height:1.55;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
-.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
-header{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px}
-h1{font-size:1.6rem;font-weight:700;margin:0;letter-spacing:.04em;text-wrap:balance}
-h1 span{color:var(--accent);transition:color .3s}
-header p{margin:0;color:var(--muted);font-size:.9rem}
-.bench{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start}
-@media (max-width:820px){.bench{grid-template-columns:minmax(0,1fr)}}
-.stage{background:var(--well);border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
-.canvasbox{position:relative;display:flex;justify-content:center}
-canvas{max-width:100%;height:auto;display:block;cursor:crosshair;touch-action:none;border-radius:2px}
-.hint{font-size:.85rem;color:var(--muted);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.hint b{color:var(--fg);font-weight:500}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px;display:flex;flex-direction:column;gap:18px;min-width:0}
-.sec{display:flex;flex-direction:column;gap:10px}
-.label{font-size:.75rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
-.btn{font:inherit;font-size:.92rem;border:1px solid var(--line);background:var(--bg);color:var(--fg);padding:9px 12px;border-radius:4px;cursor:pointer;text-align:center}
-.btn:hover{border-color:var(--muted)}
-.btn:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.btn.primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-.row .btn{flex:1 1 auto}
-.chips{display:flex;gap:8px;flex-wrap:wrap}
-.chip{display:flex;align-items:center;gap:8px;padding:5px 6px 5px 5px;border:1px solid var(--line);border-radius:4px;background:var(--bg);cursor:pointer;font:inherit;color:var(--fg)}
-.chip.active{border-color:var(--fg);box-shadow:0 0 0 1px var(--fg)}
-.sw{width:26px;height:26px;border-radius:3px;border:1px solid rgba(0,0,0,.15)}
-.chip code{font-family:var(--mono);font-size:.78rem}
-.chip .x{font-size:1rem;line-height:1;color:var(--muted);padding:0 3px;background:none;border:0;cursor:pointer}
-.slider{display:flex;flex-direction:column;gap:4px}
-.slider .top{display:flex;justify-content:space-between;font-size:.9rem}
-.slider .top output{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--muted);cursor:pointer;user-select:none;-webkit-user-select:none;padding:1px 6px;margin-right:-6px;border-radius:3px;touch-action:manipulation;transition:background .25s,color .25s}
-.slider .top output:hover{background:var(--well);color:var(--fg)}
-.slider .top output.changed{color:var(--fg)}
-.slider .top output.flash{background:var(--accent);color:#fff}
-input[type=range]{width:100%;accent-color:var(--accent)}
-.note{font-size:.8rem;color:var(--muted);margin:0}
-.toggle{display:flex;align-items:center;gap:8px;font-size:.92rem;cursor:pointer}
-.toggle input{width:18px;height:18px;accent-color:var(--accent);margin:0}
-.pv{width:100%;height:auto;max-height:340px;object-fit:contain;display:block;background:var(--well);border-radius:4px;padding:10px;box-sizing:border-box}
-.seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-.seg button,.seg label{font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--bg);color:var(--fg);padding:7px 2px;border-radius:4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative}
-.seg .on{border-color:var(--fg);box-shadow:0 0 0 1px var(--fg)}
-.seg .dot{width:18px;height:18px;border-radius:50%;border:1px solid rgba(128,128,128,.45)}
-.seg input[type=color]{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}
-#frameOpts{display:flex;flex-direction:column;gap:12px}
-.fontpick{border:1px solid var(--line);border-radius:4px;background:var(--bg)}
-.fontpick summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:4px}
-.fontpick summary::-webkit-details-marker{display:none}
-.fontpick summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.fontpick summary .lbl{font-size:.72rem;color:var(--muted);flex:none}
-.fontpick summary .cur{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
-.fontpick summary .cur .s{font-size:1.02rem;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fontpick summary .cur .n{font-size:.72rem;color:var(--muted)}
-.fontpick summary .chev{flex:none;width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translate(-2px,-2px);transition:transform .2s}
-.fontpick[open] summary .chev{transform:rotate(-135deg) translate(-2px,-2px)}
-.fontpick[open] summary{border-bottom:1px solid var(--line);border-radius:4px 4px 0 0}
-.fontpick .fonts{padding:8px}
-.fonts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
-.fonts button{font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--fg);padding:7px 8px;border-radius:4px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;min-width:0}
-.fonts button .s{font-size:1.02rem;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.fonts button .n{font-size:.72rem;color:var(--muted)}
-.fonts .on{border-color:var(--fg);box-shadow:0 0 0 1px var(--fg)}
-.result{display:flex;flex-direction:column;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px}
-.result img{width:100%;max-width:560px;border-radius:2px;align-self:center}
-.result p{margin:0;font-size:.9rem;color:var(--muted)}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+html{height:100%;box-sizing:border-box;background:#1c1a1f;padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{height:100%;margin:0;font-size:14px;overscroll-behavior:none}
+img{max-width:100%}
+[hidden]{display:none!important}
+.app{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);overflow:hidden;-webkit-tap-highlight-color:transparent}
+button{font-family:inherit}
+.app{height:100%;max-width:560px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr auto}
+header{display:flex;align-items:center;gap:8px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-family:var(--hand);font-size:20px;font-weight:700;margin:0;flex:1;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+h1 span{color:var(--accent)}
+.btn{font:600 14px/1 var(--sans);color:var(--fg);background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:9px 14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.btn.sm{padding:7px 12px;font-size:13px}
+.btn.primary{background:var(--accent);color:#2a2306;border-color:transparent}
+.btn:disabled{opacity:.35;cursor:default}
+.ibtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--chip);color:var(--fg);display:grid;place-items:center;cursor:pointer;flex:none}
+.ibtn svg,.tool svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ibtn:disabled{opacity:.35}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.stage{position:relative;min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center;touch-action:none;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+canvas#cv{display:block;border-radius:4px;box-shadow:0 10px 30px rgba(0,0,0,.45);touch-action:none;transform-origin:center center;flex:none}
+.stage.crop canvas#cv{box-shadow:none;border-radius:0}
+.pill{position:absolute;left:50%;transform:translateX(-50%);font:12px var(--sans);background:rgba(0,0,0,.66);color:#fff;padding:6px 12px;border-radius:999px;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
+#badge{top:8px}
+#status{bottom:10px}
+#zoomReset{position:absolute;top:8px;right:max(12px,env(safe-area-inset-right,0px))}
+.tray{background:var(--tray);border-top:1px solid var(--line);border-radius:18px 18px 0 0;display:grid;gap:10px;padding-block:12px calc(6px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.tray section{display:grid;gap:10px;min-width:0}
+.row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;min-width:0}
+.row::-webkit-scrollbar{display:none}
+.line2{display:flex;gap:10px;align-items:center;min-width:0}
+.chip{flex:none;display:grid;justify-items:center;gap:3px;background:var(--chip);border:1.5px solid transparent;border-radius:12px;padding:6px 8px 5px;cursor:pointer;color:var(--fg);font:13px var(--hand)}
+.chip[aria-pressed="true"]{border-color:var(--accent)}
+.chip canvas{width:52px;height:30px;display:block}
+.chip.st canvas{width:34px;height:34px}
+.chip.txt{padding:8px 12px;font-size:14px}
+.chip.font span{font-size:20px;line-height:1.1}
+.chip.preset canvas{width:96px;height:54px;border-radius:8px}
+.seg4{display:grid;grid-template-columns:repeat(4,1fr);background:var(--chip);border-radius:10px;padding:3px;flex:1;min-width:0}
+.seg4 button{font:600 13px var(--hand);color:var(--muted);background:none;border:0;border-radius:8px;padding:7px 2px;cursor:pointer}
+.seg4 button[aria-pressed="true"]{background:var(--bg);color:var(--fg)}
+.hint{margin:0;font-size:12.5px;color:var(--muted);line-height:1.5;flex:1;min-width:0}
+.colors{display:flex;gap:9px;align-items:center;overflow-x:auto;scrollbar-width:none;padding:2px}
+.colors::-webkit-scrollbar{display:none}
+.sw{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0;flex:none;position:relative}
+.sw[aria-pressed="true"]{border-color:var(--fg);box-shadow:0 0 0 3px var(--bg) inset}
+.sw.rainbow{background:conic-gradient(#f6d24a,#f28bb5,#b38df2,#9cc9f2,#8fd6a8,#f6d24a);overflow:hidden}
+.sw.rainbow input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}
+.dropper{flex:none;font:600 12px var(--sans);color:var(--fg);background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:7px 10px;cursor:pointer}
+.dropper[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.glow{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);flex:none}
+.glow input{accent-color:var(--accent);width:18px;height:18px}
+.size{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.size input{flex:1;accent-color:var(--accent);min-width:0}
+.dial{display:flex;align-items:center;gap:12px}
+.dialbody{flex:1;display:grid;justify-items:center;gap:2px;min-width:0}
+.dialbody output{font:600 13px var(--sans);font-variant-numeric:tabular-nums;color:var(--accent);cursor:pointer}
+#straight{width:100%;-webkit-appearance:none;appearance:none;height:26px;background:
+  linear-gradient(var(--fg),var(--fg)) center/2px 14px no-repeat,
+  repeating-linear-gradient(90deg,var(--muted) 0 1px,transparent 1px 9px) center/100% 8px no-repeat;opacity:.95}
+#straight::-webkit-slider-thumb{-webkit-appearance:none;width:4px;height:26px;border-radius:2px;background:var(--accent);border:0}
+#straight::-moz-range-thumb{width:4px;height:26px;border-radius:2px;background:var(--accent);border:0}
+.tools{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:2px;border-top:1px solid var(--line);padding-top:6px}
+.tool{display:grid;justify-items:center;gap:3px;background:none;border:0;color:var(--muted);font:12px var(--sans);padding:6px 0;border-radius:10px;cursor:pointer;white-space:nowrap;min-width:0}
+.kchips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+.kchips::-webkit-scrollbar{display:none}
+.kchip{flex:none;display:flex;align-items:center;gap:6px;background:var(--chip);border:1.5px solid transparent;border-radius:999px;padding:3px 8px 3px 3px;color:var(--fg);font:600 12px ui-monospace,Menlo,monospace;cursor:pointer}
+.kchip[aria-pressed="true"]{border-color:var(--accent)}
+.kchip i{width:22px;height:22px;border-radius:50%;border:1px solid rgba(255,255,255,.25)}
+.kchip b{color:var(--muted);font:400 16px/1 var(--sans);padding:0 2px}
+.sliders{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 16px}
+.sl{display:grid;gap:1px;min-width:0}
+.sl .top{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--muted)}
+.sl output{font:600 12px var(--sans);font-variant-numeric:tabular-nums;color:var(--muted);cursor:pointer;padding:1px 6px;margin-right:-6px;border-radius:4px;touch-action:manipulation;transition:background .25s,color .25s}
+.sl output.changed{color:var(--accent)}
+.sl output.flash{background:var(--accent);color:#2a2306}
+.sl input{width:100%;accent-color:var(--accent);margin:0}
+.chip.fc{display:flex;align-items:center;gap:6px;padding:7px 10px;font-size:13px;position:relative}
+.chip.fc i{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.35)}
+.chip.fc input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}
+#codeFonts .chip.font span{font-size:15px}
+@media (min-width:900px) and (min-height:560px){
+  .app{max-width:1280px;grid-template-columns:minmax(0,1fr) 380px;grid-template-rows:auto minmax(0,1fr);column-gap:16px;padding:0 16px 16px;box-sizing:border-box}
+  header{grid-column:1/-1;padding-inline:0}
+  .stage{grid-row:2;padding-inline:0}
+  .tray{grid-row:2;grid-column:2;border:1px solid var(--line);border-radius:18px;align-content:start;overflow-y:auto;padding:14px 16px}
+  .tools{order:-1;grid-template-columns:repeat(4,minmax(0,1fr));border-top:0;border-bottom:1px solid var(--line);padding:0 0 8px}
+  .row,.colors,.kchips{flex-wrap:wrap;overflow:visible}
+}
+.tool[aria-pressed="true"]{color:var(--accent);background:var(--chip)}
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(10,8,12,.88);display:grid;place-items:center;gap:12px;align-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.sheet img{max-width:100%;max-height:68vh;border-radius:6px;-webkit-touch-callout:default;user-select:auto}
+.sheet p{margin:0;font:17px var(--hand);text-align:center;max-width:30ch}
+.sheet small{color:var(--muted);font-size:12px;text-align:center}
+.tsheet{position:fixed;inset:0;z-index:25;background:rgba(10,8,12,.6);display:flex;align-items:flex-start;justify-content:center;padding:calc(14px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px))}
+.tcard{width:100%;max-width:520px;background:var(--tray);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:10px}
+.tcard h2{margin:0;font:700 17px var(--hand);letter-spacing:.04em}
+.tcard textarea{width:100%;box-sizing:border-box;resize:none;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:10px;font:18px var(--hand)}
+.tcard .actions{display:flex;gap:8px;justify-content:flex-end}
+@media (prefers-reduced-motion:no-preference){.chip,.sw,.btn,.tool{transition:border-color .15s,background-color .15s,transform .1s}.btn:active{transform:scale(.97)}}
+.sheet-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+a.btn{text-decoration:none}
 </style>
 </head>
 <body>
 
-<div class="wrap">
+<div class="app">
   <header>
-    <h1>残り<span>色</span> <small style="font-family:var(--mono);font-size:.8rem;font-weight:400;letter-spacing:.08em;color:var(--muted)">nokoriiro</small></h1>
-    <p>點照片上的顏色，只留下那個色，其他變成黑白灰。</p>
+    <h1><span>Keep</span>sake</h1>
+    <label class="btn" for="file">換照片</label>
+    <input type="file" id="file" accept="image/*" hidden>
+    <button class="ibtn" id="hold" aria-label="按住看原圖" title="按住看原圖"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    <button class="ibtn" id="undo" aria-label="復原"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+    <button class="btn primary" id="save">存圖</button>
   </header>
 
-  <div class="bench">
-    <div class="stage">
-      <div class="canvasbox"><canvas id="cv" width="800" height="560" aria-label="照片，點擊以選取顏色"></canvas></div>
-      <div class="hint"><span id="hintText">目前是範例圖。<b>點畫面任一處</b>選取要保留的顏色。</span><span id="dims" style="font-family:var(--mono)"></span></div>
-    </div>
-
-    <aside class="panel">
-      <div class="sec">
-        <div class="label">照片</div>
-        <div class="row">
-          <label class="btn primary" for="file">選擇照片</label>
-          <input id="file" type="file" accept="image/*" hidden>
-          <button class="btn" id="hold" type="button">按住看原圖</button>
-        </div>
-      </div>
-
-      <div class="sec">
-        <div class="label">保留的顏色</div>
-        <div class="chips" id="chips"></div>
-        <button class="btn" id="addColor" type="button">＋ 再加一個顏色</button>
-        <p class="note">點選上面的色塊，再點照片就會換成新的顏色。</p>
-      </div>
-
-      <div class="sec">
-        <div class="label">調整</div>
-        <div class="slider"><div class="top"><label for="tol">色相範圍</label><output id="tolO"></output></div><input id="tol" type="range" min="2" max="90" value="22"></div>
-        <div class="slider"><div class="top"><label for="soft">邊緣柔和</label><output id="softO"></output></div><input id="soft" type="range" min="0" max="60" value="14"></div>
-        <div class="slider"><div class="top"><label for="sat">飽和度門檻</label><output id="satO"></output></div><input id="sat" type="range" min="0" max="60" value="15"></div>
-        <div class="slider"><div class="top"><label for="con">黑白對比</label><output id="conO"></output></div><input id="con" type="range" min="50" max="180" value="110"></div>
-        <div class="slider"><div class="top"><label for="boost">保留色鮮豔度</label><output id="boostO"></output></div><input id="boost" type="range" min="50" max="180" value="100"></div>
-        <p class="note">範圍越大，越接近的顏色也會被保留；飽和度門檻能排除偏灰的區域。在右側數值上點兩下可回到預設值。</p>
-      </div>
-
-      <div class="sec">
-        <div class="label">外框</div>
-        <label class="toggle"><input type="checkbox" id="frameOn" checked> 加上拍立得外框</label>
-        <div id="frameOpts">
-          <canvas id="pv" class="pv" aria-label="外框預覽"></canvas>
-          <div class="seg" id="fcolor" role="group" aria-label="外框顏色">
-            <button type="button" data-c="white" class="on"><span class="dot" style="background:#fff"></span>白</button>
-            <button type="button" data-c="black"><span class="dot" style="background:#111"></span>黑</button>
-            <button type="button" data-c="accent"><span class="dot" id="accDot"></span>保留色</button>
-            <label data-c="custom"><span class="dot" id="cusDot" style="background:#e8e1d4"></span>自訂<input type="color" id="fcustom" value="#e8e1d4" aria-label="自訂外框顏色"></label>
-          </div>
-          <label class="toggle"><input type="checkbox" id="codeOn" checked> 在外框上顯示色碼</label>
-          <details class="fontpick" id="fontpick">
-            <summary><span class="lbl">字型</span><span class="cur"><span class="s" id="curS"></span><span class="n" id="curN"></span></span><span class="chev" aria-hidden="true"></span></summary>
-            <div class="fonts" id="fonts" role="group" aria-label="色碼字型"></div>
-          </details>
-          <div class="slider"><div class="top"><label for="fpad">邊框寬度</label><output id="fpadO"></output></div><input id="fpad" type="range" min="0" max="20" value="5"></div>
-          <div class="slider"><div class="top"><label for="fbot">下方留白</label><output id="fbotO"></output></div><input id="fbot" type="range" min="0" max="40" value="14"></div>
-          <p class="note">寬度以照片短邊的百分比計算，照片本身保持原比例，不裁切。</p>
-        </div>
-      </div>
-
-      <div class="sec">
-        <div class="label">儲存</div>
-        <button class="btn primary" id="export" type="button">產生成品圖</button>
-      </div>
-    </aside>
+  <div class="stage" id="stage">
+    <canvas id="cv"></canvas>
+    <div class="pill" id="badge">示範圖片 · 點「換照片」放入你的照片</div>
+    <div class="pill" id="status" hidden></div>
+    <button class="btn sm" id="zoomReset" hidden>還原縮放</button>
   </div>
 
-  <div class="result" id="result" hidden>
-    <img id="outImg" alt="處理後的成品圖">
-    <p>手機：長按圖片 →「加入照片」或「儲存影像」。電腦：在圖片上按右鍵另存。</p>
+  <div class="tray">
+    <section data-panel="draw">
+      <div class="row" id="styles" aria-label="線條樣式"></div>
+      <div class="line2"><div class="seg4" id="textures" aria-label="筆刷質感"></div><label class="glow"><input type="checkbox" id="glow" checked>微光</label></div>
+    </section>
+    <section data-panel="sticker" hidden>
+      <div class="row" id="stickers" aria-label="小圖案"></div>
+      <p class="hint">點空白處貼上；點貼圖可拖移，拉右下角圓點縮放旋轉，也可以用兩指。</p>
+    </section>
+    <section data-panel="text" hidden>
+      <div class="row" id="fontsRow" aria-label="字體"></div>
+      <p class="hint">點空白處加入文字；點文字可拖移，按左上角鉛筆修改內容。</p>
+    </section>
+    <section data-panel="erase" hidden>
+      <div class="line2"><p class="hint">用手指劃過要擦掉的線條、貼圖或文字。</p><button class="btn sm" id="clear">全部清除</button></div>
+    </section>
+    <section data-panel="crop" hidden>
+      <div class="row" id="aspects" aria-label="裁切比例"></div>
+      <div class="dial">
+        <button class="ibtn" id="rotL" aria-label="向左旋轉 90 度"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+        <div class="dialbody"><output id="angleVal" title="點一下回到 0°">0°</output><input type="range" id="straight" min="-45" max="45" step="0.5" value="0" aria-label="拉直角度"></div>
+        <button class="ibtn" id="flipH" aria-label="水平翻轉"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7l-5 5 5 5z"/><path d="M16 7l5 5-5 5z"/></svg></button>
+      </div>
+      <div class="line2"><p class="hint">拖動四角調整範圍，拉刻度把照片轉正。</p><button class="btn sm" id="cropReset">重設</button></div>
+    </section>
+    <section data-panel="keep" hidden>
+      <div class="line2"><label class="glow"><input type="checkbox" id="keepOn">黑白留色</label><div class="kchips" id="kchips" aria-label="保留的顏色"></div><button class="btn sm" id="kadd">＋顏色</button></div>
+      <div class="sliders" id="ksliders"></div>
+      <p class="hint">點照片選要保留的顏色，其他變成黑白灰。點上方色塊切換要調整哪個顏色；數值點兩下回預設。</p>
+    </section>
+    <section data-panel="frame" hidden>
+      <div class="row" id="framePresets" aria-label="外框樣式"></div>
+      <div class="line2"><div class="row" id="fcolors" aria-label="外框顏色"></div><label class="glow"><input type="checkbox" id="codeOn">色碼</label></div>
+      <div class="sliders" id="fsliders"></div>
+      <div class="row" id="codeFonts" aria-label="色碼字型"></div>
+    </section>
+    <section data-panel="style" hidden>
+      <div class="row" id="presets" aria-label="一鍵風格"></div>
+      <p class="hint">選一個風格會換好顏色、線條和亮片圖案，接著直接畫就行。</p>
+    </section>
+    <div class="colors" id="colors" data-for="draw sticker text"></div>
+    <div class="size" data-for="draw sticker text erase"><span id="sizeLbl">粗細</span><input type="range" id="width" min="2" max="16" value="6" aria-label="粗細"><button class="btn sm" id="sprinkle" data-for="draw sticker">灑亮片</button></div>
+    <nav class="tools" id="tools" aria-label="工具"></nav>
+  </div>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <img id="out" alt="完成的圖片">
+  <div class="sheet-actions">
+    <button class="btn primary" id="share" hidden>儲存到相簿／分享</button>
+    <a class="btn" id="download" href="#" download="keepsake.jpg">下載圖片</a>
+  </div>
+  <small>也可以長按圖片，選「加入照片」</small>
+  <button class="btn" id="close">回去繼續編輯</button>
+</div>
+
+<div class="tsheet" id="tsheet" hidden>
+  <div class="tcard">
+    <h2 id="tTitle">加入文字</h2>
+    <textarea id="tinput" rows="2" placeholder="例如：今天的花 ♡"></textarea>
+    <div class="row" id="tfonts"></div>
+    <div class="actions"><button class="btn" id="tcancel">取消</button><button class="btn primary" id="tok">完成</button></div>
   </div>
 </div>
 
 <script>
-(function(){
-const cv=document.getElementById('cv'),ctx=cv.getContext('2d',{willReadFrequently:true});
-const MAX=2000;
-let W=0,H=0,orig=null,hue,sat,val,lum,showOrig=false;
-let colors=[{h:2,s:.8,v:.8,rgb:[208,52,44]}],active=0;
-const $=id=>document.getElementById(id);
-const S={tol:$('tol'),soft:$('soft'),sat:$('sat'),con:$('con'),boost:$('boost'),fpad:$('fpad'),fbot:$('fbot')};
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const cv=$('#cv'),ctx=cv.getContext('2d');
+const photo=document.createElement('canvas'),pctx=photo.getContext('2d',{willReadFrequently:true});
+const cache=document.createElement('canvas'),cctx=cache.getContext('2d');
+const measure=document.createElement('canvas').getContext('2d');
 
-function rgb2hsv(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let h=0;
-  if(d){if(mx===r)h=((g-b)/d)%6;else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;h*=60;if(h<0)h+=360}
-  return [h,mx?d/mx:0,mx]}
-const hex=c=>'#'+c.map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase();
-const ss=(a,b,x)=>{if(b<=a)return x>=b?1:0;const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t)};
+let items=[],undoStack=[],nextId=1,V=null,photoBlob=null,hasPhoto=false;
+let sel=null,live=null,liveIds=new Set(),cropMode=false,cropDrag=null,zoom={z:1,x:0,y:0},showOrig=false;
+const S={tool:'draw',style:'hand',texture:'smooth',color:'#F6D24A',width:6,glow:true,sticker:'paw',font:'hand',sprinkle:null,recent:[],picking:false};
+/* K: black-and-white colour keep (up to 4 kept colours, each with its own sliders). FR: frame geometry is % of the photo's short side. */
+const KDEF={tol:22,soft:14,sat:15,boost:100};
+let K={on:false,con:110,active:0,colors:[{h:2,rgb:[208,52,44],p:{...KDEF}}]};
+let FR={pad:5,bot:14,mode:'white',custom:'#E8E1D4',code:true,font:'plex'};
 
-function load(img){
-  let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;const k=Math.min(1,MAX/Math.max(w,h));
-  W=cv.width=Math.round(w*k);H=cv.height=Math.round(h*k);ctx.drawImage(img,0,0,W,H);
-  orig=ctx.getImageData(0,0,W,H);const d=orig.data,n=W*H;
-  hue=new Float32Array(n);sat=new Float32Array(n);val=new Float32Array(n);lum=new Float32Array(n);
-  for(let i=0,p=0;i<n;i++,p+=4){const r=d[p],g=d[p+1],b=d[p+2];const t=rgb2hsv(r,g,b);hue[i]=t[0];sat[i]=t[1];val[i]=t[2];lum[i]=.2126*r+.7152*g+.0722*b}
-  $('dims').textContent=W+' × '+H;render();
-}
-
-function render(){
-  if(!orig)return;
-  if(showOrig){ctx.putImageData(orig,0,0);return}
-  const tol=+S.tol.value,soft=+S.soft.value,minS=S.sat.value/100,con=S.con.value/100,boost=S.boost.value/100;
-  const out=ctx.createImageData(W,H),o=out.data,d=orig.data,n=W*H;
-  for(let i=0,p=0;i<n;i++,p+=4){
-    let w=0;const h=hue[i];
-    for(let c=0;c<colors.length;c++){let dh=Math.abs(h-colors[c].h);if(dh>180)dh=360-dh;const hw=1-ss(tol,tol+soft+.001,dh);if(hw>w)w=hw}
-    if(w>0)w*=ss(minS,minS+.08,sat[i])*ss(.04,.12,val[i]);
-    let g=(lum[i]-128)*con+128;g=g<0?0:g>255?255:g;
-    let r=d[p],gg=d[p+1],b=d[p+2];
-    if(boost!==1&&w>0){const l=lum[i];r=l+(r-l)*boost;gg=l+(gg-l)*boost;b=l+(b-l)*boost}
-    o[p]=g+(r-g)*w;o[p+1]=g+(gg-g)*w;o[p+2]=g+(b-g)*w;o[p+3]=255;
-  }
-  ctx.putImageData(out,0,0);
-  drawPreview();
-}
-
-function chips(){
-  const box=$('chips');box.innerHTML='';
-  colors.forEach((c,i)=>{const b=document.createElement('div');b.className='chip'+(i===active?' active':'');b.tabIndex=0;b.setAttribute('role','button');
-    b.innerHTML='<span class="sw" style="background:'+hex(c.rgb)+'"></span><code>'+hex(c.rgb)+'</code>'+(colors.length>1?'<button class="x" type="button" aria-label="移除這個顏色">×</button>':'');
-    b.onclick=e=>{if(e.target.classList.contains('x')){colors.splice(i,1);active=Math.min(active,colors.length-1)}else active=i;chips();render()};
-    b.onkeydown=e=>{if(e.key==='Enter'){active=i;chips()}};
-    box.appendChild(b)});
-  document.documentElement.style.setProperty('--accent',hex(colors[active].rgb));
-  $('addColor').disabled=colors.length>=4;
-}
-
-function pick(e){
-  if(!orig)return;const r=cv.getBoundingClientRect();
-  const x=Math.round((e.clientX-r.left)/r.width*W),y=Math.round((e.clientY-r.top)/r.height*H);
-  let R=0,G=0,B=0,c=0;const d=orig.data;
-  for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=W||yy>=H)continue;const p=(yy*W+xx)*4;R+=d[p];G+=d[p+1];B+=d[p+2];c++}
-  if(!c)return;const rgb=[R/c|0,G/c|0,B/c|0],t=rgb2hsv(...rgb);
-  colors[active]={h:t[0],s:t[1],v:t[2],rgb};
-  $('hintText').innerHTML=t[1]<.12?'這個點接近灰色，色相不明確，建議點顏色更鮮明的地方。':'已選取 <b>'+hex(rgb)+'</b>，可再點別處更換，或用右側滑桿微調。';
-  chips();render();
-}
-cv.addEventListener('pointerdown',pick);
-
-let tm;
-Object.entries(S).forEach(([k,el])=>{const o=$(k+'O');const def=el.defaultValue;
-  const f=()=>{o.textContent=k==='tol'?'±'+el.value+'°':k==='soft'?el.value+'°':el.value+'%';o.classList.toggle('changed',el.value!==def)};f();
-  const fn=k[0]==='f'?drawPreview:render;
-  el.addEventListener('input',()=>{f();cancelAnimationFrame(tm);tm=requestAnimationFrame(fn)});
-  const reset=()=>{el.value=def;f();fn();o.classList.add('flash');setTimeout(()=>o.classList.remove('flash'),350)};
-  o.tabIndex=0;o.setAttribute('role','button');o.title='點兩下回到預設值（'+def+'）';
-  let last=0;o.addEventListener('pointerup',e=>{const t=e.timeStamp;if(t-last<350){reset();last=0}else last=t});
-  o.addEventListener('dblclick',e=>e.preventDefault());
-  o.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();reset()}})});
-
-$('addColor').onclick=()=>{if(colors.length>=4)return;colors.push({...colors[active],rgb:[...colors[active].rgb]});active=colors.length-1;chips();$('hintText').innerHTML='新增了一個顏色欄位，<b>點照片</b>選取第二個要保留的顏色。'};
-
-const hold=$('hold');
-const on=e=>{e.preventDefault();showOrig=true;render()},off=()=>{if(showOrig){showOrig=false;render()}};
-hold.addEventListener('pointerdown',on);['pointerup','pointerleave','pointercancel'].forEach(t=>hold.addEventListener(t,off));
-
-$('file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const url=URL.createObjectURL(f);const img=new Image();
-  img.onload=()=>{load(img);URL.revokeObjectURL(url);$('result').hidden=true;$('hintText').innerHTML='<b>點照片上的顏色</b>來選取要保留的部分。'};
-  img.onerror=()=>{$('hintText').textContent='這個檔案無法開啟。請改用 JPG 或 PNG；iPhone 的 HEIC 照片可先在「照片」App 分享成 JPG。'};
-  img.src=url;e.target.value=''});
-
-/* 外框 */
-const pv=$('pv'),frameOn=$('frameOn'),codeOn=$('codeOn');let fmode='white';
+const COLORS=['#F6D24A','#F28BB5','#FFFFFF','#9CC9F2','#C9767A','#CFC03E'];
+const PAIR={'#F6D24A':'#C9767A','#F28BB5':'#CFC03E','#FFFFFF':'#F28BB5','#9CC9F2':'#FFFFFF','#C9767A':'#CFC03E','#CFC03E':'#C9767A'};
+const STYLES=[['hand','手繪'],['wavy','波浪'],['double','雙線'],['dash','虛線'],['ticks','光芒']];
+const TEXTURES=[['smooth','平滑'],['crayon','蠟筆'],['chalk','粉筆'],['glitter','亮片']];
+const STICKERS=[['paw','貓掌'],['fishbone','魚骨頭'],['yarn','毛線球'],['catface','貓臉'],['sparkle','閃光'],['star','星星'],['heart','愛心'],['smile','笑臉'],['flower','小花'],['crown','皇冠'],['spiral','漩渦'],['loops','波波'],['plus','十字'],['dot','圓點'],['arcs','弧線']];
+// k = size multiplier when the font is used for colour codes on the frame
 const FONTS=[
-  {n:'IBM Plex Mono',d:'工程等寬',css:'"IBM Plex Mono",ui-monospace,Menlo,monospace',w:500,scale:1},
-  {n:'Space Mono',d:'復古等寬',css:'"Space Mono",ui-monospace,Menlo,monospace',w:400,scale:1},
-  {n:'Courier Prime',d:'打字機',css:'"Courier Prime","Courier New",monospace',w:400,scale:1.08},
-  {n:'DM Mono',d:'輕盈等寬',css:'"DM Mono",ui-monospace,Menlo,monospace',w:400,scale:1},
-  {n:'Playfair Display',d:'優雅襯線',css:'"Playfair Display",Georgia,serif',w:500,scale:1.08},
-  {n:'Josefin Sans',d:'幾何無襯線',css:'"Josefin Sans",system-ui,sans-serif',w:500,scale:1.08},
-  {n:'Caveat',d:'手寫',css:'Caveat,"Comic Sans MS",cursive',w:500,scale:1.35},
-  {n:'Shadows Into Light',d:'手寫麻克筆',css:'"Shadows Into Light","Comic Sans MS",cursive',w:400,scale:1.3},
-  {n:'Playwrite AR Guides',d:'練字格線',css:'"Playwrite AR Guides","Comic Sans MS",cursive',w:400,scale:.85},
-  {n:'系統預設',d:'手機內建',css:'system-ui,-apple-system,sans-serif',w:500,scale:1}
-];let fontIdx=0;
-function fontButtons(){const box=$('fonts');box.innerHTML='';const t=hex(colors[active].rgb);
-  FONTS.forEach((F,i)=>{const b=document.createElement('button');b.type='button';b.className=i===fontIdx?'on':'';
-    b.innerHTML='<span class="s" style=\'font-family:'+F.css+';font-weight:'+F.w+'\'>'+t+'</span><span class="n">'+F.n+'・'+F.d+'</span>';
-    b.onclick=()=>{fontIdx=i;fontButtons();drawPreview();$('fontpick').open=false};box.appendChild(b)});
-  const F=FONTS[fontIdx],cs=$('curS');cs.textContent=t;cs.style.fontFamily=F.css;cs.style.fontWeight=F.w;$('curN').textContent=F.n+'・'+F.d}
-function frameRGB(){if(fmode==='white')return[255,255,255];if(fmode==='black')return[17,17,17];if(fmode==='accent')return colors[active].rgb;
-  const v=$('fcustom').value;return[1,3,5].map(i=>parseInt(v.substr(i,2),16))}
-function compose(maxSide){
-  const s=maxSide?Math.min(1,maxSide/Math.max(W,H)):1,iw=Math.round(W*s),ih=Math.round(H*s),base=Math.min(iw,ih);
-  const pad=Math.round(base*S.fpad.value/100),bot=pad+Math.round(base*S.fbot.value/100);
-  const c=document.createElement('canvas');c.width=iw+pad*2;c.height=ih+pad+bot;const g=c.getContext('2d');
-  const fr=frameRGB();g.fillStyle=hex(fr);g.fillRect(0,0,c.width,c.height);
-  g.imageSmoothingQuality='high';g.drawImage(cv,pad,pad,iw,ih);
-  if(codeOn.checked&&bot>0){
-    const F=FONTS[fontIdx];let fs=Math.min(base*.042,bot*.38)*F.scale;
-    if(fs>=4){
-      const L=(.2126*fr[0]+.7152*fr[1]+.0722*fr[2])/255;
-      const txt=colors.map(col=>hex(col.rgb)).join('   ');
-      g.font=F.w+' '+fs+'px '+F.css;
-      const maxW=iw*.92,tw=g.measureText(txt).width;if(tw>maxW){fs*=maxW/tw;g.font=F.w+' '+fs+'px '+F.css}
-      g.textAlign='center';g.textBaseline='middle';
-      g.fillStyle=L>.55?'rgba(29,28,26,.88)':'rgba(255,255,255,.9)';
-      g.fillText(txt,c.width/2,pad+ih+bot/2+fs*.04);
-    }
+  {id:'hand',name:'手寫楷',fam:'"LXGW WenKai TC"',w:700,cjk:true},
+  {id:'round',name:'粉圓',fam:'"Huninn"',w:400,cjk:true},
+  {id:'latin',name:'Caveat',fam:'"Caveat"',w:700,k:1.35},
+  {id:'plex',name:'IBM Plex',fam:'"IBM Plex Mono"',w:500},
+  {id:'space',name:'Space Mono',fam:'"Space Mono"',w:400},
+  {id:'courier',name:'打字機',fam:'"Courier Prime"',w:400,k:1.08},
+  {id:'dm',name:'DM Mono',fam:'"DM Mono"',w:400},
+  {id:'playfair',name:'優雅襯線',fam:'"Playfair Display"',w:500,k:1.08},
+  {id:'josefin',name:'幾何',fam:'"Josefin Sans"',w:500,k:1.08},
+  {id:'shadows',name:'麥克筆',fam:'"Shadows Into Light"',w:400,k:1.3},
+  {id:'guides',name:'練字格線',fam:'"Playwrite AR Guides"',w:400,k:.85},
+  {id:'sys',name:'系統字',fam:'system-ui,-apple-system',w:500},
+];
+const ASPECTS=[['orig','原始'],['free','自由'],['1:1','1:1'],['4:5','4:5'],['3:4','3:4'],['9:16','9:16'],['16:9','16:9']];
+const FRAMES=[['none','無邊框',0,0,false],['border','白邊',4.5,0,false],['polaroid','拍立得',6,18,false],['card','色卡',5,14,true]];
+const FCOLORS=[['white','白','#FBFAF6'],['black','黑','#111111'],['accent','主色',null],['custom','自訂',null]];
+const PRESETS=[
+  {id:'sun',name:'金色向日葵',style:'hand',texture:'glitter',color:'#F6D24A',glow:true,width:6,sprinkle:{types:['sparkle','star','smile','dot','plus'],color:null}},
+  {id:'peony',name:'粉色愛心',style:'hand',texture:'crayon',color:'#F28BB5',glow:false,width:6,sprinkle:{types:['heart','dot','flower','sparkle'],color:null}},
+  {id:'lily',name:'雙線百合',style:'double',texture:'smooth',color:'#C9767A',glow:false,width:7,sprinkle:{types:['loops','spiral','plus','arcs'],color:null}},
+  {id:'baby',name:'白色虛線',style:'dash',texture:'chalk',color:'#FFFFFF',glow:false,width:5,sprinkle:{types:['flower','crown','star','dot'],color:'#F28BB5'}},
+  {id:'cat',name:'貓咪日常',style:'wavy',texture:'crayon',color:'#F28BB5',glow:false,width:6,sprinkle:{types:['paw','fishbone','yarn','heart','dot'],color:null}},
+];
+const TOOLS=[
+  ['draw','畫筆','<path d="M4 20c3-1 4-3 6-5l8-8a2.1 2.1 0 0 0-3-3l-8 8c-2 2-4 3-5 6z"/>'],
+  ['sticker','貼圖','<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/>'],
+  ['text','文字','<path d="M5 7V4h14v3"/><path d="M12 4v16"/><path d="M9 20h6"/>'],
+  ['erase','橡皮擦','<path d="M7 20h12"/><path d="M4.5 14.5l9-9a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L12 17H7z"/>'],
+  ['keep','留色','<path d="M12 3c3.6 4.3 6 7.5 6 10.6a6 6 0 0 1-12 0C6 10.5 8.4 7.3 12 3z"/><path d="M12 3v16.6"/>'],
+  ['crop','裁切','<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M2 6h14a2 2 0 0 1 2 2v14"/>'],
+  ['frame','外框','<rect x="4" y="3" width="16" height="18" rx="1.5"/><rect x="7" y="6" width="10" height="9"/>'],
+  ['style','風格','<path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.7-.8 1.7-1.6 0-1.2-1-1.6-1-2.6 0-.9.7-1.5 1.6-1.5H17a4 4 0 0 0 4-4c0-4.6-4-8.3-9-8.3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>'],
+];
+
+/* ---------- small helpers ---------- */
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function noise1(seed){const r=rng(seed),v=Array.from({length:256},()=>r()*2-1);return x=>{const i=Math.floor(x),f=x-i,a=v[(i%256+256)%256],b=v[((i+1)%256+256)%256],t=f*f*(3-2*f);return a+(b-a)*t}}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const clone=o=>JSON.parse(JSON.stringify(o));
+function hexRgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return[n>>16&255,n>>8&255,n&255]}
+function rgbHex(r,g,b){return'#'+[r,g,b].map(v=>Math.round(clamp(v,0,255)).toString(16).padStart(2,'0')).join('').toUpperCase()}
+function rgbHsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;let h=0,s=0;if(mx!==mn){const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);h=(mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4)*60}return[h,s,l]}
+function hslHex(h,s,l){const f=n=>{const k=(n+h/30)%12,a=s*Math.min(l,1-l);return l-a*Math.max(-1,Math.min(k-3,9-k,1))};return rgbHex(f(0)*255,f(8)*255,f(4)*255)}
+function pairFor(c){c=c.toUpperCase();if(PAIR[c])return PAIR[c];const[h,s,l]=rgbHsl(...hexRgb(c));return hslHex((h+50)%360,Math.max(.35,s*.85),l>.55?l-.18:l+.2)}
+function lighten(c,a){const[r,g,b]=hexRgb(c);return rgbHex(r+(255-r)*a,g+(255-g)*a,b+(255-b)*a)}
+const scaleOf=c=>{const t=c.getTransform();return Math.hypot(t.a,t.b)||1};
+let statusTimer;
+function status(msg,ms=2600){clearTimeout(statusTimer);const el=$('#status');el.textContent=msg||'';el.hidden=!msg;if(msg&&ms)statusTimer=setTimeout(()=>el.hidden=true,ms)}
+
+/* ---------- stroke geometry ---------- */
+function resample(pts,step){
+  if(pts.length<2)return pts.slice();
+  const out=[pts[0]];let prev=pts[0],acc=0;
+  for(let i=1;i<pts.length;i++){let p=pts[i],d=Math.hypot(p.x-prev.x,p.y-prev.y);
+    while(acc+d>=step){const t=(step-acc)/d,q={x:prev.x+(p.x-prev.x)*t,y:prev.y+(p.y-prev.y)*t};out.push(q);prev=q;d=Math.hypot(p.x-prev.x,p.y-prev.y);acc=0}
+    acc+=d;prev=p}
+  out.push(pts[pts.length-1]);return out;
+}
+function smooth(p,n){for(let k=0;k<n;k++)p=p.map((pt,i)=>{if(i===0||i===p.length-1)return pt;const a=p[i-1],b=p[i+1];return{x:(a.x+pt.x*2+b.x)/4,y:(a.y+pt.y*2+b.y)/4}});return p}
+function process(raw,w,style,seed){
+  const p=smooth(resample(raw,Math.max(1.5,w*.5)),4),n=noise1(seed),out=[];let s=0;
+  for(let i=0;i<p.length;i++){
+    const a=p[Math.max(0,i-1)],b=p[Math.min(p.length-1,i+1)],dx=b.x-a.x,dy=b.y-a.y,l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l;
+    if(i>0)s+=Math.hypot(p[i].x-p[i-1].x,p[i].y-p[i-1].y);
+    let off=n(s/(w*14))*w*.45;
+    if(style==='wavy')off+=Math.sin(s/(w*2.2))*w*1.3;
+    if(style==='double')off+=Math.sin(s/(w*3.6))*w*.7;
+    out.push({x:p[i].x+nx*off,y:p[i].y+ny*off,nx,ny,s});
   }
-  return c;
+  return out;
 }
-function drawPreview(){
-  if(!orig||showOrig)return;
-  $('accDot').style.background=hex(colors[active].rgb);
-  const sw=hex(colors[active].rgb);document.querySelectorAll('#fonts .s,#curS').forEach(s=>s.textContent=sw);
-  if(!frameOn.checked)return;
-  const c=compose(640);pv.width=c.width;pv.height=c.height;pv.getContext('2d').drawImage(c,0,0);
+function curve(c,p,off=0){
+  const P=off?p.map(q=>({x:q.x+q.nx*off,y:q.y+q.ny*off})):p;
+  c.beginPath();c.moveTo(P[0].x,P[0].y);
+  for(let i=1;i<P.length-1;i++)c.quadraticCurveTo(P[i].x,P[i].y,(P[i].x+P[i+1].x)/2,(P[i].y+P[i+1].y)/2);
+  const L=P[P.length-1];c.lineTo(L.x,L.y);c.stroke();
 }
-$('fcolor').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;fmode=b.dataset.c;
-  $('fcolor').querySelectorAll('[data-c]').forEach(x=>x.classList.toggle('on',x===b));drawPreview()});
-$('fcustom').addEventListener('input',e=>{$('cusDot').style.background=e.target.value;fmode='custom';
-  $('fcolor').querySelectorAll('[data-c]').forEach(x=>x.classList.toggle('on',x.dataset.c==='custom'));drawPreview()});
-frameOn.addEventListener('change',()=>{$('frameOpts').hidden=!frameOn.checked;drawPreview()});
-codeOn.addEventListener('change',drawPreview);
-fontButtons();
-try{Promise.all(FONTS.map(F=>document.fonts.load(F.w+' 40px '+F.css,'#0123456789ABCDEF'))).then(drawPreview,drawPreview)}catch(e){}
 
-$('export').onclick=()=>{showOrig=false;render();const img=$('outImg');img.src=(frameOn.checked?compose(0):cv).toDataURL('image/jpeg',.92);$('result').hidden=false;$('result').scrollIntoView({behavior:'smooth',block:'start'})};
+/* ---------- brush textures ---------- */
+const patCache=new Map();
+function paint(c,color,tex,w){
+  if(tex!=='crayon'&&tex!=='chalk')return color;
+  const key=color+tex;let t=patCache.get(key);
+  if(!t){t=document.createElement('canvas');t.width=t.height=96;const g=t.getContext('2d'),id=g.createImageData(96,96),[r,gg,b]=hexRgb(color),R=rng(tex==='chalk'?11:7);
+    for(let y=0;y<96;y++)for(let x=0;x<96;x++){const i=(y*96+x)*4,v=R();let a;
+      if(tex==='crayon'){a=v<.1?0:.6+.4*R();if((y+(x*7)%5)%9===0)a*=.5}else a=v<.34?0:.35+.65*R();
+      id.data[i]=r;id.data[i+1]=gg;id.data[i+2]=b;id.data[i+3]=a*255}
+    g.putImageData(id,0,0);patCache.set(key,t)}
+  const p=c.createPattern(t,'repeat');try{p.setTransform(new DOMMatrix().scale(Math.max(.6,w/(tex==='chalk'?4:5))))}catch(e){}
+  return p;
+}
+function ink(c,color,lw,glow,tex,w){
+  const st=paint(c,color,tex,w||lw);c.strokeStyle=st;c.fillStyle=st;c.lineWidth=lw;c.lineCap='round';c.lineJoin='round';
+  c.shadowColor=glow?color:'transparent';c.shadowBlur=glow?lw*1.6*scaleOf(c):0;
+}
+function glitter(c,p,it,off){
+  const R=rng((it.seed^0x5bd1)+(off>0?1:0)),w=it.w;
+  c.shadowColor='#FFF8D0';c.shadowBlur=it.glow?w*scaleOf(c):0;
+  for(const q of p){if(R()>.42)continue;const o=off+(R()-.5)*w*1.1,x=q.x+q.nx*o,y=q.y+q.ny*o;
+    c.fillStyle=R()<.55?'#FFFBEA':lighten(it.color,.55);c.beginPath();c.arc(x,y,w*(.07+R()*.16),0,7);c.fill();
+    if(R()<.05){const s=w*1.1;c.beginPath();c.moveTo(x,y-s);c.quadraticCurveTo(x,y,x+s*.7,y);c.quadraticCurveTo(x,y,x,y+s);c.quadraticCurveTo(x,y,x-s*.7,y);c.quadraticCurveTo(x,y,x,y-s);c.fill()}}
+}
 
-/* 範例圖：雨天街景與一把紅傘 */
+/* ---------- drawing items ---------- */
+function drawStroke(c,it){
+  const w=it.w,tex=it.texture||'smooth';c.save();c.setLineDash([]);
+  if(it.pts.length<2){ink(c,it.color,w,it.glow,tex);c.beginPath();c.arc(it.pts[0].x,it.pts[0].y,w*.5,0,7);c.fill();c.restore();return}
+  const p=process(it.pts,w,it.style,it.seed),gl=tex==='glitter';
+  if(it.style==='double'){
+    ink(c,it.color,w*.75,it.glow,tex,w);curve(c,p,w*1.05);
+    ink(c,pairFor(it.color),w*.75,it.glow,tex,w);curve(c,p,-w*1.05);
+    if(gl){glitter(c,p,it,w*1.05);glitter(c,p,it,-w*1.05)}
+  }else if(it.style==='dash'){
+    ink(c,it.color,w,it.glow,tex,w);c.setLineDash([w*1.6,w*2.6]);curve(c,p);c.setLineDash([]);if(gl)glitter(c,p,it,0);
+  }else if(it.style==='ticks'){
+    ink(c,it.color,w*.8,it.glow,tex,w);let next=0;
+    for(const q of p)if(q.s>=next){c.beginPath();c.moveTo(q.x-q.nx*w*1.1,q.y-q.ny*w*1.1);c.lineTo(q.x+q.nx*w*1.1,q.y+q.ny*w*1.1);c.stroke();next=q.s+w*3.6}
+  }else{ink(c,it.color,w,it.glow,tex,w);curve(c,p);if(gl)glitter(c,p,it,0)}
+  c.restore();
+}
+function stickerPath(c,type,s){
+  c.lineWidth=Math.max(1,s*.13);
+  switch(type){
+    case'sparkle':c.beginPath();c.moveTo(0,-s);c.quadraticCurveTo(s*.08,-s*.08,s*.8,0);c.quadraticCurveTo(s*.08,s*.08,0,s);c.quadraticCurveTo(-s*.08,s*.08,-s*.8,0);c.quadraticCurveTo(-s*.08,-s*.08,0,-s);c.closePath();c.globalAlpha*=.35;c.fill();c.globalAlpha/=.35;c.stroke();break;
+    case'star':c.beginPath();for(let i=0;i<10;i++){const r=i%2?s*.45:s,a=-Math.PI/2+i*Math.PI/5;c.lineTo(Math.cos(a)*r,Math.sin(a)*r)}c.closePath();c.stroke();break;
+    case'heart':c.beginPath();c.moveTo(0,s*.75);c.bezierCurveTo(-s*1.3,-s*.1,-s*.6,-s*1.05,0,-s*.35);c.bezierCurveTo(s*.6,-s*1.05,s*1.3,-s*.1,0,s*.75);c.closePath();c.stroke();break;
+    case'smile':c.beginPath();c.arc(0,0,s,0,7);c.stroke();c.beginPath();c.ellipse(-s*.35,-s*.22,s*.08,s*.14,0,0,7);c.ellipse(s*.35,-s*.22,s*.08,s*.14,0,0,7);c.fill();c.beginPath();c.arc(0,s*.05,s*.52,.18*Math.PI,.82*Math.PI);c.stroke();break;
+    case'flower':for(let i=0;i<5;i++){const a=i*Math.PI*2/5-Math.PI/2;c.beginPath();c.arc(Math.cos(a)*s*.55,Math.sin(a)*s*.55,s*.4,0,7);c.stroke()}c.beginPath();c.arc(0,0,s*.22,0,7);c.fill();break;
+    case'crown':c.beginPath();c.moveTo(-s,s*.5);c.lineTo(-s,-s*.45);c.lineTo(-s*.5,s*.05);c.lineTo(0,-s*.65);c.lineTo(s*.5,s*.05);c.lineTo(s,-s*.45);c.lineTo(s,s*.5);c.closePath();c.stroke();break;
+    case'spiral':c.beginPath();for(let t=0;t<=Math.PI*4.2;t+=.15){const r=s*t/(Math.PI*4.2);c.lineTo(Math.cos(t)*r,Math.sin(t)*r)}c.stroke();break;
+    case'loops':c.beginPath();for(let i=-1;i<=1;i++)c.arc(i*s*.6,-s*.1,s*.3,Math.PI,0,true);c.stroke();break;
+    case'plus':c.beginPath();c.moveTo(0,-s*.7);c.lineTo(0,s*.7);c.moveTo(-s*.7,0);c.lineTo(s*.7,0);c.stroke();break;
+    case'dot':c.beginPath();c.arc(0,0,s*.28,0,7);c.fill();break;
+    case'arcs':for(let i=0;i<3;i++){c.beginPath();c.arc(-s*.9,0,s*(.5+i*.32),-.45,.45);c.stroke()}break;
+    case'paw':c.beginPath();c.ellipse(0,s*.32,s*.44,s*.36,0,0,7);c.fill();
+      for(const[x,y,a]of[[-.66,-.18,-.5],[-.25,-.62,-.15],[.25,-.62,.15],[.66,-.18,.5]]){c.beginPath();c.ellipse(x*s,y*s,s*.17,s*.23,a,0,7);c.fill()}break;
+    case'fishbone':c.beginPath();c.ellipse(-s*.6,0,s*.32,s*.36,0,0,7);c.stroke();c.beginPath();c.arc(-s*.66,-s*.08,s*.07,0,7);c.fill();
+      c.beginPath();c.moveTo(-s*.28,0);c.lineTo(s*.72,0);c.stroke();
+      for(const[x,h]of[[-.08,.36],[.2,.3],[.46,.22]]){c.beginPath();c.moveTo(x*s,-h*s);c.quadraticCurveTo(x*s+s*.13,0,x*s,h*s);c.stroke()}
+      c.beginPath();c.moveTo(s*.72,0);c.lineTo(s,-s*.3);c.moveTo(s*.72,0);c.lineTo(s,s*.3);c.stroke();break;
+    case'yarn':c.beginPath();c.arc(0,0,s*.75,0,7);c.stroke();
+      c.save();c.beginPath();c.arc(0,0,s*.75,0,7);c.clip();
+      for(const r of[.55,.85,1.15]){c.beginPath();c.arc(-s*.85,s*.35,s*r,-1.2,.6);c.stroke()}
+      for(const r of[.5,.8]){c.beginPath();c.arc(s*.7,-s*.6,s*r,1.6,3.2);c.stroke()}c.restore();
+      c.beginPath();c.moveTo(s*.55,s*.52);c.bezierCurveTo(s*.9,s*.85,s*1.1,s*.45,s*.85,s*.35);c.bezierCurveTo(s*.65,s*.3,s*.75,s*.95,s*1.05,s*.95);c.stroke();break;
+    case'catface':c.beginPath();c.moveTo(-s*.75,-s*.05);c.lineTo(-s*.68,-s*.85);c.lineTo(-s*.3,-s*.5);c.quadraticCurveTo(0,-s*.6,s*.3,-s*.5);c.lineTo(s*.68,-s*.85);c.lineTo(s*.75,-s*.05);
+      c.quadraticCurveTo(s*.8,s*.7,0,s*.7);c.quadraticCurveTo(-s*.8,s*.7,-s*.75,-s*.05);c.stroke();
+      for(const x of[-.3,.3]){c.beginPath();c.ellipse(x*s,-s*.05,s*.07,s*.11,0,0,7);c.fill()}
+      c.beginPath();c.arc(-s*.09,s*.22,s*.09,0,Math.PI);c.moveTo(s*.18,s*.22);c.arc(s*.09,s*.22,s*.09,0,Math.PI);c.stroke();
+      c.beginPath();for(const g of[-1,1]){c.moveTo(g*s*.48,s*.14);c.lineTo(g*s*1.02,s*.06);c.moveTo(g*s*.48,s*.27);c.lineTo(g*s,s*.36)}c.stroke();break;
+  }
+}
+const fontOf=id=>FONTS.find(f=>f.id===id)||FONTS[0];
+const fontStr=it=>{const F=fontOf(it.font);return`${F.w} ${it.s}px ${F.fam}, "PingFang TC", "Noto Sans TC", sans-serif`};
+function drawSticker(c,it,flip=!!V?.flip){
+  c.save();c.translate(it.x,it.y);c.rotate(it.rot);if(flip)c.scale(-1,1);ink(c,it.color,1,it.glow,it.texture,it.s*.2);c.setLineDash([]);stickerPath(c,it.type,it.s);c.restore();
+}
+function drawText(c,it){
+  c.save();c.translate(it.x,it.y);c.rotate(it.rot);if(V?.flip)c.scale(-1,1);ink(c,it.color,1,it.glow,'smooth');
+  c.font=fontStr(it);c.textAlign='center';c.textBaseline='middle';
+  const L=it.text.split('\n'),lh=it.s*1.25;L.forEach((l,i)=>c.fillText(l,0,(i-(L.length-1)/2)*lh));c.restore();
+}
+const drawItem=(c,it)=>it.kind==='stroke'?drawStroke(c,it):it.kind==='sticker'?drawSticker(c,it):drawText(c,it);
+
+/* ---------- colour keep (black & white except the picked hues) ---------- */
+const proc=document.createElement('canvas'),qctx=proc.getContext('2d');
+let KD=null,kKey='';
+const ss=(a,b,x)=>{if(b<=a)return x>=b?1:0;const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
+function prepKeep(){
+  // per-pixel hue (0.5° steps), HSV saturation, value and luma, computed once per photo so slider drags only do table lookups
+  const w=photo.width,h=photo.height,n=w*h,d=pctx.getImageData(0,0,w,h).data;
+  const hue=new Uint16Array(n),sat=new Uint8Array(n),val=new Uint8Array(n),lum=new Uint8Array(n);
+  for(let i=0,p=0;i<n;i++,p+=4){const r=d[p],g=d[p+1],b=d[p+2],mx=Math.max(r,g,b),mn=Math.min(r,g,b),dd=mx-mn;let hh=0;
+    if(dd){hh=mx===r?((g-b)/dd)%6:mx===g?(b-r)/dd+2:(r-g)/dd+4;hh*=60;if(hh<0)hh+=360}
+    hue[i]=Math.round(hh*2)%720;sat[i]=mx?Math.round(dd/mx*255):0;val[i]=mx;lum[i]=Math.round(.2126*r+.7152*g+.0722*b)}
+  proc.width=w;proc.height=h;KD={n,d,hue,sat,val,lum,out:qctx.createImageData(w,h)};kKey='';
+}
+function computeKeep(){
+  const{n,d,hue,sat,val,lum,out}=KD,o=out.data,con=K.con/100;
+  const cs=K.colors.map(C=>{const a=C.p.tol,b=C.p.tol+C.p.soft+.001,m=C.p.sat/100,H=new Float32Array(720),Sa=new Float32Array(256);
+    for(let i=0;i<720;i++){let dh=Math.abs(i/2-C.h);if(dh>180)dh=360-dh;H[i]=1-ss(a,b,dh)}
+    for(let i=0;i<256;i++)Sa[i]=ss(m,m+.08,i/255);return{H,Sa,boost:C.p.boost/100}});
+  const VG=new Float32Array(256),G=new Uint8ClampedArray(256),nc=cs.length;
+  for(let i=0;i<256;i++){VG[i]=ss(.04,.12,i/255);G[i]=(i-128)*con+128}
+  for(let i=0,p=0;i<n;i++,p+=4){
+    let w=0,bi=-1;const vg=VG[val[i]];
+    if(vg>0){const hq=hue[i],sq=sat[i];for(let c=0;c<nc;c++){const x=cs[c].H[hq]*cs[c].Sa[sq];if(x>w){w=x;bi=c}}}
+    w*=vg;const g=G[lum[i]];
+    if(w>0){let r=d[p],gg=d[p+1],b=d[p+2];const bo=cs[bi].boost;if(bo!==1){const l=lum[i];r=l+(r-l)*bo;gg=l+(gg-l)*bo;b=l+(b-l)*bo}
+      o[p]=g+(r-g)*w;o[p+1]=g+(gg-g)*w;o[p+2]=g+(b-g)*w}
+    else o[p]=o[p+1]=o[p+2]=g;
+    o[p+3]=255;
+  }
+  qctx.putImageData(out,0,0);
+}
+// the photo as it should be shown right now; recomputes the colour keep only when its settings changed
+function src(){
+  if(showOrig||!K.on)return photo;
+  if(!KD)prepKeep();const key=JSON.stringify([K.con,K.colors]);if(key!==kKey){computeKeep();kKey=key}
+  return proc;
+}
+const kHex=C=>rgbHex(...C.rgb);
+const mainColor=()=>K.on?kHex(K.colors[K.active]):S.color;
+function codeColors(){
+  if(K.on)return K.colors.map(kHex);
+  const u=[];for(const it of items)if(!u.includes(it.color.toUpperCase()))u.push(it.color.toUpperCase());
+  return(u.length?u:[S.color]).slice(0,4);
+}
+function frameHex(){const f=FCOLORS.find(c=>c[0]===FR.mode);return FR.mode==='accent'?mainColor():FR.mode==='custom'?FR.custom.toUpperCase():f?f[2]:'#FBFAF6'}
+
+/* ---------- view: crop, rotation, frame ---------- */
+const ang=()=>V.q*90+V.straight;
+const Rm=()=>new DOMMatrix().rotate(ang()).scale(V.flip?-1:1,1).translate(-photo.width/2,-photo.height/2);
+function defaultView(){return{q:0,straight:0,flip:false,aspect:'orig',crop:{cx:0,cy:0,w:photo.width,h:photo.height}}}
+function margins(cw,ch){const m=Math.min(cw,ch),p=Math.round(m*FR.pad/100);return{l:p,t:p,r:p,b:p+Math.round(m*FR.bot/100)}}
+function outSize(){const c=V.crop,m=margins(c.w,c.h);return{w:Math.max(1,Math.round(c.w+m.l+m.r)),h:Math.max(1,Math.round(c.h+m.t+m.b))}}
+function viewMatrix(){const c=V.crop,m=margins(c.w,c.h);return new DOMMatrix().translate(m.l+c.w/2-c.cx,m.t+c.h/2-c.cy).multiply(Rm())}
+const unit=()=>Math.max(V.crop.w,V.crop.h)/1000;
+function fits(c){const Ri=Rm().inverse(),pw=photo.width,ph=photo.height,e=.5;
+  for(const sx of[-1,1])for(const sy of[-1,1]){const p=Ri.transformPoint(new DOMPoint(c.cx+sx*c.w/2,c.cy+sy*c.h/2));if(p.x<-e||p.y<-e||p.x>pw+e||p.y>ph+e)return false}return true}
+const lerpC=(a,b,t)=>({cx:a.cx+(b.cx-a.cx)*t,cy:a.cy+(b.cy-a.cy)*t,w:a.w+(b.w-a.w)*t,h:a.h+(b.h-a.h)*t});
+function shrinkToFit(c){
+  if(fits(c))return c;let cx=c.cx,cy=c.cy;
+  if(!fits({cx,cy,w:1,h:1})){let lo=0,hi=1;for(let i=0;i<18;i++){const m=(lo+hi)/2;fits({cx:c.cx*(1-m),cy:c.cy*(1-m),w:1,h:1})?hi=m:lo=m}cx=c.cx*(1-hi);cy=c.cy*(1-hi)}
+  let lo=0,hi=1;for(let i=0;i<20;i++){const m=(lo+hi)/2;fits({cx,cy,w:c.w*m,h:c.h*m})?lo=m:hi=m}
+  return{cx,cy,w:c.w*lo,h:c.h*lo};
+}
+function constrain(a,b){if(fits(b))return b;if(!fits(a))return shrinkToFit(b);let lo=0,hi=1;for(let i=0;i<18;i++){const m=(lo+hi)/2;fits(lerpC(a,b,m))?lo=m:hi=m}return lerpC(a,b,lo)}
+function aspectNum(key=V.aspect){if(key==='free')return null;if(key==='orig')return V.q%2?photo.height/photo.width:photo.width/photo.height;const[a,b]=key.split(':').map(Number);return a/b}
+function maxCrop(key){
+  const pw=photo.width,ph=photo.height;
+  if(key==='orig'&&V.straight===0)return V.q%2?{cx:0,cy:0,w:ph,h:pw}:{cx:0,cy:0,w:pw,h:ph};
+  const a=aspectNum(key)||aspectNum('orig'),W=pw+ph,w0=a>=1?W:W*a,h0=a>=1?W/a:W;
+  let lo=0,hi=1;for(let i=0;i<22;i++){const m=(lo+hi)/2;fits({cx:0,cy:0,w:w0*m,h:h0*m})?lo=m:hi=m}
+  return{cx:0,cy:0,w:w0*lo,h:h0*lo};
+}
+const upright=()=>{const t=ang()*Math.PI/180;return V.flip?t:-t};
+const itemMatrix=it=>new DOMMatrix().translate(it.x,it.y).rotate(it.rot*180/Math.PI).scale(V.flip?-1:1,1);
+function box(it){
+  if(it.kind==='sticker')return{hw:it.s*1.15,hh:it.s*1.15};
+  measure.font=fontStr(it);const L=it.text.split('\n'),mw=Math.max(...L.map(l=>measure.measureText(l).width));
+  return{hw:mw/2+it.s*.35,hh:L.length*it.s*1.25/2+it.s*.25};
+}
+
+/* ---------- rendering ---------- */
+function drawCode(c,o,cr,m){
+  if(!FR.code||m.b<1)return;
+  const F=fontOf(FR.font);let fs=Math.min(Math.min(cr.w,cr.h)*.042,m.b*.38)*(F.k||1);if(fs<4)return;
+  const[r,g,b]=hexRgb(frameHex()),L=(.2126*r+.7152*g+.0722*b)/255,txt=codeColors().join('   ');
+  c.font=fontStr({font:FR.font,s:fs});const maxW=cr.w*.92,tw=c.measureText(txt).width;if(tw>maxW){fs*=maxW/tw;c.font=fontStr({font:FR.font,s:fs})}
+  c.textAlign='center';c.textBaseline='middle';c.fillStyle=L>.55?'rgba(29,28,26,.88)':'rgba(255,255,255,.9)';
+  c.fillText(txt,o.w/2,m.t+cr.h+m.b/2+fs*.04);
+}
+function renderScene(c,exclude){
+  const o=outSize(),cr=V.crop,m=margins(cr.w,cr.h),M=viewMatrix();
+  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,o.w,o.h);
+  if(m.l||m.b){c.fillStyle=frameHex();c.fillRect(0,0,o.w,o.h);drawCode(c,o,cr,m)}
+  c.save();c.beginPath();c.rect(m.l,m.t,cr.w,cr.h);c.clip();c.setTransform(M);c.drawImage(src(),0,0,photo.width,photo.height);c.restore();
+  if(!showOrig){c.setTransform(M);for(const it of items)if(!exclude||!exclude.has(it.id))drawItem(c,it)}
+  c.setTransform(1,0,0,1,0,0);
+}
+function rebuild(){if(cropMode){render();return}renderScene(cctx,liveIds);render();$('#undo').disabled=!undoStack.length}
+let rbPending=false;function scheduleRebuild(){if(rbPending)return;rbPending=true;requestAnimationFrame(()=>{rbPending=false;rebuild()})}
+const ppc=()=>cv.width/(cv.getBoundingClientRect().width||1);
+const getSel=()=>items.find(i=>i.id===sel)||null;
+function render(){
+  if(cropMode){renderCrop();return}
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);ctx.drawImage(cache,0,0);
+  ctx.setTransform(viewMatrix());
+  if(!showOrig){for(const it of items)if(liveIds.has(it.id))drawItem(ctx,it);
+    if(live)drawItem(ctx,live);
+    drawSel(ctx)}
+  if(gesture?.type==='erase'&&gesture.cursor){const p=gesture.cursor,pp=ppc();ctx.save();ctx.lineWidth=1.5*pp;ctx.strokeStyle='#fff';ctx.shadowColor='#000';ctx.shadowBlur=3;ctx.beginPath();ctx.arc(p.x,p.y,S.width*unit()*2.2,0,7);ctx.stroke();ctx.restore()}
+  ctx.setTransform(1,0,0,1,0,0);
+}
+function handlePts(it){let{hw,hh}=box(it);const m=16*ppc();hw=Math.max(hw,m);hh=Math.max(hh,m);const M=itemMatrix(it),P=(x,y)=>M.transformPoint(new DOMPoint(x,y));const h={del:P(hw,-hh),rot:P(hw,hh)};if(it.kind==='text')h.edit=P(-hw,-hh);return h}
+function drawSel(c){
+  const it=getSel();if(!it||!(S.tool==='sticker'||S.tool==='text'))return;
+  const{hw,hh}=box(it),M=itemMatrix(it),pp=ppc();
+  c.save();c.transform(M.a,M.b,M.c,M.d,M.e,M.f);c.setLineDash([6*pp,5*pp]);c.lineWidth=1.6*pp;c.strokeStyle='rgba(255,255,255,.95)';c.shadowColor='rgba(0,0,0,.7)';c.shadowBlur=3;c.strokeRect(-hw,-hh,hw*2,hh*2);c.restore();
+  const H=handlePts(it),r=12*pp;c.save();c.setLineDash([]);
+  for(const[k,p]of Object.entries(H)){c.fillStyle=k==='del'?'#E0546F':'#F6D24A';c.shadowColor='rgba(0,0,0,.5)';c.shadowBlur=4;c.beginPath();c.arc(p.x,p.y,r,0,7);c.fill();c.shadowBlur=0;
+    c.strokeStyle=k==='del'?'#fff':'#2a2306';c.lineWidth=2*pp;c.lineCap='round';c.beginPath();const a=4.5*pp;
+    if(k==='del'){c.moveTo(p.x-a,p.y-a);c.lineTo(p.x+a,p.y+a);c.moveTo(p.x+a,p.y-a);c.lineTo(p.x-a,p.y+a)}
+    else if(k==='rot'){c.arc(p.x,p.y,a,-.3,Math.PI*1.4);c.moveTo(p.x+a,p.y-a*.3);c.lineTo(p.x+a+2*pp,p.y-a*1.2);c.moveTo(p.x+a,p.y-a*.3);c.lineTo(p.x+a-2.5*pp,p.y-a*1.1)}
+    else{c.moveTo(p.x-a,p.y+a);c.lineTo(p.x+a,p.y-a);c.moveTo(p.x-a,p.y+a);c.lineTo(p.x-a*.4,p.y+a)}
+    c.stroke()}
+  c.restore();
+}
+const cssVar=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function cropT(){const pw=photo.width,ph=photo.height,odd=V.q%2,qw=odd?ph:pw,qh=odd?pw:ph,pad=40*ppc(),k=Math.min((cv.width-pad)/qw,(cv.height-pad)/qh);return new DOMMatrix().translate(cv.width/2,cv.height/2).scale(k)}
+function renderCrop(){
+  const T=cropT(),k=T.a,lw=ppc()/k,c=V.crop,x=c.cx-c.w/2,y=c.cy-c.h/2;
+  ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle=cssVar('--bg');ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.setTransform(T.multiply(Rm()));ctx.drawImage(src(),0,0,photo.width,photo.height);if(!showOrig)for(const it of items)drawItem(ctx,it);
+  ctx.setTransform(T);
+  ctx.beginPath();ctx.rect(-1e6,-1e6,2e6,2e6);ctx.rect(x,y,c.w,c.h);ctx.fillStyle='rgba(16,14,18,.64)';ctx.fill('evenodd');
+  ctx.strokeStyle='rgba(255,255,255,.92)';ctx.lineWidth=lw*1.2;ctx.strokeRect(x,y,c.w,c.h);
+  ctx.strokeStyle=`rgba(255,255,255,${cropDrag||V.straight?.55:.25})`;ctx.lineWidth=lw;ctx.beginPath();
+  const n=V.straight&&!cropDrag?6:3;for(let i=1;i<n;i++){const t=i/n;ctx.moveTo(x+c.w*t,y);ctx.lineTo(x+c.w*t,y+c.h);ctx.moveTo(x,y+c.h*t);ctx.lineTo(x+c.w,y+c.h*t)}ctx.stroke();
+  ctx.strokeStyle='#fff';ctx.lineWidth=lw*3.5;ctx.lineCap='square';const L=Math.min(22*lw,c.w/3,c.h/3);
+  for(const sx of[0,1])for(const sy of[0,1]){const X=x+sx*c.w,Y=y+sy*c.h;ctx.beginPath();ctx.moveTo(X+(sx?-L:L),Y);ctx.lineTo(X,Y);ctx.lineTo(X,Y+(sy?-L:L));ctx.stroke()}
+  ctx.setTransform(1,0,0,1,0,0);
+}
+
+/* ---------- layout & zoom ---------- */
+function stageBox(){const r=$('#stage').getBoundingClientRect();return{w:Math.max(60,r.width-24),h:Math.max(60,r.height-16)}}
+function applyZoom(){
+  if(cropMode)zoom={z:1,x:0,y:0};
+  cv.style.transform=zoom.z===1&&!zoom.x&&!zoom.y?'':`translate(${zoom.x}px,${zoom.y}px) scale(${zoom.z})`;
+  $('#zoomReset').hidden=!(zoom.z>1.01);
+}
+function fitCss(){const b=stageBox();if(cropMode){cv.style.width=b.w+'px';cv.style.height=b.h+'px'}else{const k=Math.min(b.w/cv.width,b.h/cv.height);cv.style.width=cv.width*k+'px';cv.style.height=cv.height*k+'px'}applyZoom()}
+function applyView(){
+  $('#stage').classList.toggle('crop',cropMode);
+  if(cropMode){const b=stageBox(),d=Math.min(2,devicePixelRatio||1);cv.width=Math.round(b.w*d);cv.height=Math.round(b.h*d);fitCss();render();return}
+  const o=outSize();cv.width=o.w;cv.height=o.h;cache.width=o.w;cache.height=o.h;fitCss();rebuild();
+}
+new ResizeObserver(()=>{if(!V)return;cropMode?applyView():fitCss()}).observe($('#stage'));
+function zoomAbout(mx,my,z,base){
+  const r=$('#stage').getBoundingClientRect(),C={x:r.left+r.width/2,y:r.top+r.height/2};
+  const q={x:(base.mx-C.x-base.x)/base.z,y:(base.my-C.y-base.y)/base.z};
+  z=clamp(z,1,6);const w=parseFloat(cv.style.width)||1,h=parseFloat(cv.style.height)||1;
+  const lx=(w*z-w)/2+w*.25,ly=(h*z-h)/2+h*.25;
+  zoom={z,x:clamp(mx-C.x-z*q.x,-lx,lx),y:clamp(my-C.y-z*q.y,-ly,ly)};
+  if(z===1)zoom={z:1,x:0,y:0};applyZoom();
+}
+$('#zoomReset').onclick=()=>{zoom={z:1,x:0,y:0};applyZoom()};
+$('#stage').addEventListener('wheel',e=>{if(cropMode)return;e.preventDefault();const b={...zoom,mx:e.clientX,my:e.clientY};zoomAbout(e.clientX,e.clientY,zoom.z*Math.exp(-e.deltaY*.0015),b)},{passive:false});
+
+/* ---------- undo & save ---------- */
+let snapped=false;
+function snap(){undoStack.push(clone({items,V,K,FR}));if(undoStack.length>50)undoStack.shift();snapped=true;$('#undo').disabled=false}
+$('#undo').onclick=()=>{
+  if(!undoStack.length)return;const s=undoStack.pop();items=s.items;V=s.V;K=s.K;FR=s.FR;sel=null;live=null;liveIds.clear();
+  syncCropUI();syncKeepUI();syncFrameUI();renderColors();applyView();$('#undo').disabled=!undoStack.length;scheduleSave();
+};
+const DB={
+  open(){return new Promise((res,rej)=>{const r=indexedDB.open('keepsake',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})},
+  async put(k,v){const db=await this.open();return new Promise((res,rej)=>{const tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error)})},
+  async get(k){const db=await this.open();return new Promise((res,rej)=>{const r=db.transaction('kv').objectStore('kv').get(k);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+};
+let saveTimer;
+function settings(){const{tool,picking,...rest}=S;return clone(rest)}
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(async()=>{try{
+    if(hasPhoto&&photoBlob)await DB.put('draft',{photo:photoBlob,items:clone(items),V:clone(V),K:clone(K),FR:clone(FR),t:Date.now()});
+    await DB.put('settings',{...settings(),FR:clone(FR)});
+  }catch(e){}},700);
+}
+
+/* ---------- pointer input ---------- */
+const pointers=new Map();let gesture=null;
+function toCv(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*cv.width/r.width,y:(e.clientY-r.top)*cv.height/r.height}}
+function toPhoto(e){const p=toCv(e);const q=viewMatrix().inverse().transformPoint(new DOMPoint(p.x,p.y));return{x:q.x,y:q.y}}
+function cropPt(e){const p=toCv(e);const q=cropT().inverse().transformPoint(new DOMPoint(p.x,p.y));return{x:q.x,y:q.y}}
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function hitItem(p){for(let i=items.length-1;i>=0;i--){const it=items[i];if(it.kind==='stroke')continue;const l=itemMatrix(it).inverse().transformPoint(new DOMPoint(p.x,p.y)),{hw,hh}=box(it);if(Math.abs(l.x)<=hw&&Math.abs(l.y)<=hh)return it}return null}
+function hitHandle(it,p){const H=handlePts(it),r=22*ppc();for(const[k,q]of Object.entries(H))if(dist(p,q)<r)return k;return null}
+
+cv.addEventListener('pointerdown',e=>{
+  e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(_){}
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pointers.size===1)snapped=false;
+  if(cropMode){if(pointers.size===1)cropDown(e);return}
+  if(pointers.size===2){startPinch();return}
+  if(pointers.size>2)return;
+  singleDown(e);
+});
+cv.addEventListener('pointermove',e=>{
+  if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(cropMode){if(cropDrag)cropMove(e);return}
+  if(!gesture)return;
+  if(gesture.type==='zoom'||gesture.type==='itemPinch'){if(pointers.size>=2)pinchMove();return}
+  singleMove(e);
+});
+const up=e=>{
+  if(!pointers.has(e.pointerId))return;pointers.delete(e.pointerId);
+  if(cropMode){if(!pointers.size)cropUp();return}
+  if(pointers.size)return;
+  endGesture();
+};
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+
+function singleDown(e){
+  const p=toPhoto(e),u=unit();
+  if(S.picking){pickColor(p);gesture=null;return}
+  if(S.tool==='keep'){pickKeep(p);gesture=null;return}
+  if(S.tool==='frame'){gesture=null;return}
+  if(S.tool==='draw'){snap();live={kind:'stroke',id:nextId++,pts:[p],style:S.style,texture:S.texture,color:S.color,w:S.width*u,glow:S.glow,seed:(Math.random()*1e9)|0};gesture={type:'stroke'};render();return}
+  if(S.tool==='erase'){snap();gesture={type:'erase',last:p,cursor:p,changed:false};eraseAlong(p,p);render();return}
+  if(S.tool==='sticker'||S.tool==='text'){
+    const s=getSel();
+    if(s){const h=hitHandle(s,p);
+      if(h==='del'){snap();items=items.filter(i=>i!==s);sel=null;gesture=null;rebuild();scheduleSave();return}
+      if(h==='edit'){gesture=null;openText(s);return}
+      if(h==='rot'){snap();const c={x:s.x,y:s.y};gesture={type:'handle',it:s,c,a0:Math.atan2(p.y-c.y,p.x-c.x),d0:Math.max(1,dist(p,c)),s0:s.s,r0:s.rot,moved:false};liveIds=new Set([s.id]);rebuild();return}}
+    const hit=hitItem(p);
+    if(hit){sel=hit.id;snap();gesture={type:'move',it:hit,start:p,x0:hit.x,y0:hit.y,moved:false};liveIds=new Set([hit.id]);rebuild();return}
+    if(S.tool==='sticker'){snap();const it={kind:'sticker',id:nextId++,type:S.sticker,x:p.x,y:p.y,s:S.width*u*5.5,rot:upright()+(Math.random()-.5)*.4,color:S.color,glow:S.glow,texture:S.texture==='glitter'?'smooth':S.texture};
+      items.push(it);sel=it.id;gesture={type:'move',it,start:p,x0:p.x,y0:p.y,moved:true};liveIds=new Set([it.id]);rebuild();return}
+    if(s){sel=null;gesture=null;render();return}
+    gesture=null;openText(null,p);
+  }
+}
+function singleMove(e){
+  const g=gesture,p=toPhoto(e);
+  if(g.type==='stroke'){const l=live.pts[live.pts.length-1];if(dist(p,l)>unit()*1.5){live.pts.push(p);render()}}
+  else if(g.type==='erase'){eraseAlong(g.last,p);g.last=p;g.cursor=p;if(!rbPending)render()}
+  else if(g.type==='move'){g.it.x=g.x0+p.x-g.start.x;g.it.y=g.y0+p.y-g.start.y;if(dist(p,g.start)>unit()*2)g.moved=true;render()}
+  else if(g.type==='handle'){const a=Math.atan2(p.y-g.c.y,p.x-g.c.x);g.it.rot=g.r0+(a-g.a0);g.it.s=clamp(g.s0*dist(p,g.c)/g.d0,4,4000);g.moved=true;render()}
+}
+function startPinch(){
+  if(gesture?.type==='stroke'){live=null}
+  if(gesture?.type==='erase')gesture=null;
+  const[a,b]=[...pointers.values()];const s=getSel();
+  if(s&&(S.tool==='sticker'||S.tool==='text')){
+    if(!snapped)snap();
+    const pa=toPhoto({clientX:a.x,clientY:a.y}),pb=toPhoto({clientX:b.x,clientY:b.y});
+    gesture={type:'itemPinch',it:s,d0:Math.max(1,dist(pa,pb)),a0:Math.atan2(pb.y-pa.y,pb.x-pa.x),m0:{x:(pa.x+pb.x)/2,y:(pa.y+pb.y)/2},x0:s.x,y0:s.y,s0:s.s,r0:s.rot};liveIds=new Set([s.id]);
+  }else{
+    if(snapped&&gesture?.type==='stroke'){undoStack.pop()}
+    gesture={type:'zoom',d0:Math.max(1,dist(a,b)),base:{...zoom,mx:(a.x+b.x)/2,my:(a.y+b.y)/2}};
+  }
+  rebuild();
+}
+function pinchMove(){
+  const[a,b]=[...pointers.values()],g=gesture;
+  if(g.type==='zoom'){zoomAbout((a.x+b.x)/2,(a.y+b.y)/2,g.base.z*dist(a,b)/g.d0,g.base);return}
+  const pa=toPhoto({clientX:a.x,clientY:a.y}),pb=toPhoto({clientX:b.x,clientY:b.y});
+  g.it.s=clamp(g.s0*dist(pa,pb)/g.d0,4,4000);g.it.rot=g.r0+Math.atan2(pb.y-pa.y,pb.x-pa.x)-g.a0;
+  g.it.x=g.x0+(pa.x+pb.x)/2-g.m0.x;g.it.y=g.y0+(pa.y+pb.y)/2-g.m0.y;render();
+}
+function endGesture(){
+  const g=gesture;gesture=null;
+  if(g?.type==='stroke'&&live){if(live.pts.length>1)live.pts=resample(live.pts,Math.max(1.5,live.w*.4));items.push(live);live=null}
+  if(g?.type==='erase'&&!g.changed)undoStack.pop();
+  if(g?.type==='move'&&!g.moved)undoStack.pop();
+  liveIds.clear();rebuild();scheduleSave();
+}
+
+/* ---------- eraser ---------- */
+function eraseAlong(a,b){
+  const r=S.width*unit()*2.2,n=Math.max(1,Math.ceil(dist(a,b)/(r*.5))),E=[];
+  for(let i=0;i<=n;i++)E.push({x:a.x+(b.x-a.x)*i/n,y:a.y+(b.y-a.y)*i/n});
+  const minX=Math.min(a.x,b.x),maxX=Math.max(a.x,b.x),minY=Math.min(a.y,b.y),maxY=Math.max(a.y,b.y);
+  let changed=false;const out=[];
+  for(const it of items){
+    if(it.kind==='stroke'){
+      const t=r+it.w*(it.style==='wavy'||it.style==='double'?1.6:.8),t2=t*t;
+      let hit=false;const flags=it.pts.map(p=>{if(p.x<minX-t||p.x>maxX+t||p.y<minY-t||p.y>maxY+t)return false;const h=E.some(e=>(p.x-e.x)**2+(p.y-e.y)**2<t2);if(h)hit=true;return h});
+      if(!hit){out.push(it);continue}changed=true;let run=[];
+      const flush=()=>{if(run.length>=2)out.push({...it,id:nextId++,pts:run});run=[]};
+      it.pts.forEach((p,i)=>{if(flags[i])flush();else run.push(p)});flush();
+    }else{const t=r+it.s*.6;if(E.some(e=>(it.x-e.x)**2+(it.y-e.y)**2<t*t)){changed=true;if(it.id===sel)sel=null;continue}out.push(it)}
+  }
+  if(changed){items=out;if(gesture)gesture.changed=true;scheduleRebuild()}
+}
+$('#clear').onclick=()=>{if(!items.length)return;snap();items=[];sel=null;rebuild();scheduleSave();status('已清除，按左上的復原可以找回來')};
+
+/* ---------- crop interaction ---------- */
+function cropDown(e){
+  const q=cropPt(e),c=V.crop,hr=26*ppc()/cropT().a;let mode=null;
+  for(const sx of[-1,1])for(const sy of[-1,1])if(!mode&&dist(q,{x:c.cx+sx*c.w/2,y:c.cy+sy*c.h/2})<hr)mode={type:'corner',sx,sy};
+  if(!mode&&V.aspect==='free'){for(const[sx,sy]of[[-1,0],[1,0],[0,-1],[0,1]])if(!mode&&dist(q,{x:c.cx+sx*c.w/2,y:c.cy+sy*c.h/2})<hr)mode={type:'edge',sx,sy}}
+  if(!mode)mode={type:'move'};
+  snap();cropDrag={...mode,start:q,c0:{...c},moved:false};render();
+}
+function cropMove(e){
+  const d=cropDrag,q=cropPt(e),c0=d.c0,minS=.06*Math.max(photo.width,photo.height);d.moved=true;
+  if(d.type==='move'){let a=constrain(V.crop,{...V.crop,cx:c0.cx+q.x-d.start.x});a=constrain(a,{...a,cy:c0.cy+q.y-d.start.y});V.crop=a}
+  else if(d.type==='corner'){const A={x:c0.cx-d.sx*c0.w/2,y:c0.cy-d.sy*c0.h/2};let w=Math.max(minS,(q.x-A.x)*d.sx),h=Math.max(minS,(q.y-A.y)*d.sy);const a=aspectNum();if(a){if(w/h>a)h=w/a;else w=h*a}
+    V.crop=constrain(V.crop,{cx:A.x+d.sx*w/2,cy:A.y+d.sy*h/2,w,h})}
+  else{if(d.sx){const Ax=c0.cx-d.sx*c0.w/2,w=Math.max(minS,(q.x-Ax)*d.sx);V.crop=constrain(V.crop,{cx:Ax+d.sx*w/2,cy:c0.cy,w,h:c0.h})}
+    else{const Ay=c0.cy-d.sy*c0.h/2,h=Math.max(minS,(q.y-Ay)*d.sy);V.crop=constrain(V.crop,{cx:c0.cx,cy:Ay+d.sy*h/2,w:c0.w,h})}}
+  render();
+}
+function cropUp(){if(cropDrag&&!cropDrag.moved)undoStack.pop();cropDrag=null;render();scheduleSave()}
+let straightActive=false,cropIntent=null;
+$('#straight').addEventListener('input',e=>{
+  if(!straightActive){straightActive=true;snap();cropIntent={...V.crop}}
+  V.straight=+e.target.value;V.crop=shrinkToFit(cropIntent);$('#angleVal').textContent=fmtAng(V.straight);render();
+});
+$('#straight').addEventListener('change',()=>{straightActive=false;scheduleSave()});
+const fmtAng=a=>(a>0?'+':'')+(Math.round(a*10)/10)+'°';
+$('#angleVal').onclick=()=>{if(!V.straight)return;snap();V.straight=0;V.crop=shrinkToFit(V.crop);syncCropUI();render();scheduleSave()};
+$('#rotL').onclick=()=>{snap();const c=V.crop;V.q=(V.q+3)%4;V.crop={cx:c.cy,cy:-c.cx,w:c.h,h:c.w};
+  if(/^\d+:\d+$/.test(V.aspect)){const[a,b]=V.aspect.split(':');V.aspect=b+':'+a}V.crop=shrinkToFit(V.crop);syncCropUI();render();scheduleSave()};
+$('#flipH').onclick=()=>{snap();V.flip=!V.flip;V.q=(4-V.q)%4;V.straight=-V.straight;V.crop={...V.crop,cx:-V.crop.cx};V.crop=shrinkToFit(V.crop);syncCropUI();render();scheduleSave()};
+$('#cropReset').onclick=()=>{snap();V=defaultView();syncCropUI();render();scheduleSave()};
+
+/* ---------- colors, eyedropper, presets, sprinkle ---------- */
+function pickColor(p){
+  S.picking=false;$('#dropper')?.setAttribute('aria-pressed','false');
+  const x=Math.round(p.x),y=Math.round(p.y);
+  if(x<1||y<1||x>=photo.width-1||y>=photo.height-1){status('請點在照片上吸取顏色');return}
+  const d=pctx.getImageData(x-1,y-1,3,3).data;let r=0,g=0,b=0;for(let i=0;i<36;i+=4){r+=d[i];g+=d[i+1];b+=d[i+2]}
+  setColor(rgbHex(r/9,g/9,b/9),true);status('已吸取照片上的顏色',1800);
+}
+function pickKeep(p){
+  const x=Math.round(p.x),y=Math.round(p.y);
+  if(x<0||y<0||x>=photo.width||y>=photo.height){status('請點在照片上選取要保留的顏色');return}
+  const x0=Math.max(0,x-2),y0=Math.max(0,y-2),w=Math.min(photo.width,x+3)-x0,h=Math.min(photo.height,y+3)-y0;
+  const d=pctx.getImageData(x0,y0,w,h).data;let r=0,g=0,b=0;const n=d.length/4;for(let i=0;i<d.length;i+=4){r+=d[i];g+=d[i+1];b+=d[i+2]}
+  const rgb=[r/n|0,g/n|0,b/n|0],mx=Math.max(...rgb),sv=mx?(mx-Math.min(...rgb))/mx:0;
+  snap();Object.assign(K.colors[K.active],{h:rgbHsl(...rgb)[0],rgb});K.on=true;
+  status(sv<.12?'這個點接近灰色，色相不明確，建議點顏色更鮮明的地方':'已保留 '+rgbHex(...rgb)+'，可再點別處更換，或用下方滑桿微調',2800);
+  syncKeepUI();syncFrameUI();renderColors();scheduleRebuild();scheduleSave();
+}
+function setColor(c,remember){
+  c=c.toUpperCase();S.color=c;S.sprinkle=S.sprinkle?{...S.sprinkle,color:null}:null;
+  if(remember&&!COLORS.includes(c)){S.recent=[c,...S.recent.filter(x=>x!==c)].slice(0,4)}
+  const it=getSel();if(it&&(S.tool==='sticker'||S.tool==='text')&&it.color!==c){snap();it.color=c}
+  renderColors();refreshPreviews();scheduleRebuild();scheduleSave();
+}
+function renderColors(){
+  const row=$('#colors');row.innerHTML='';
+  // kept colours from the colour-keep tool join the brush palette so doodles can match them
+  const kept=K.on?K.colors.map(kHex):[];
+  [...new Set([...COLORS,...kept,...S.recent])].forEach(col=>{const b=document.createElement('button');b.className='sw';b.style.background=col;b.setAttribute('aria-label','顏色 '+col);b.setAttribute('aria-pressed',col===S.color);b.onclick=()=>setColor(col);row.append(b)});
+  const l=document.createElement('label');l.className='sw rainbow';l.title='自訂顏色';l.setAttribute('aria-pressed',!COLORS.includes(S.color)&&!kept.includes(S.color)&&!S.recent.includes(S.color));
+  const inp=document.createElement('input');inp.type='color';inp.id='pick';inp.value=S.color.toLowerCase();inp.setAttribute('aria-label','自訂顏色');inp.onchange=e=>setColor(e.target.value,true);l.append(inp);row.append(l);
+  const d=document.createElement('button');d.className='dropper';d.id='dropper';d.textContent='吸色';d.setAttribute('aria-pressed',S.picking);
+  d.onclick=()=>{if(cropMode)return;S.picking=!S.picking;d.setAttribute('aria-pressed',S.picking);if(S.picking)status('點一下照片，吸取那裡的顏色',0);else status('')};row.append(d);
+}
+function applyPreset(p){
+  Object.assign(S,{style:p.style,texture:p.texture,color:p.color,glow:p.glow,width:p.width,sprinkle:clone(p.sprinkle)});
+  setTool('draw');syncUI();status(`已套用「${p.name}」，直接在照片上畫，或按「灑亮片」`,3200);scheduleSave();
+}
+$('#sprinkle').onclick=()=>{
+  const u=unit(),w=S.width*u,r=Math.random,sp=S.sprinkle,col=sp?.color||S.color;
+  const types=sp?.types||(['#F28BB5','#C9767A'].includes(S.color)?['sparkle','heart','dot','plus','sparkle']:['sparkle','star','dot','plus','sparkle']);
+  let src=null;for(let i=items.length-1;i>=0;i--)if(items[i].kind==='stroke'&&items[i].pts.length>4){src=items[i];break}
+  const Mi=viewMatrix().inverse(),cr=V.crop,m=margins(cr.w,cr.h),add=[];
+  for(let i=0;i<9;i++){
+    let x,y;
+    if(src){const p=process(src.pts,src.w,'hand',src.seed),q=p[(r()*p.length)|0],d=(r()<.5?-1:1)*src.w*(4+r()*7);x=q.x+q.nx*d;y=q.y+q.ny*d}
+    else{const edge=r()<.5,ox=edge?(r()<.5?r()*.18:.82+r()*.18):r(),oy=edge?r():(r()<.5?r()*.15:.85+r()*.15);const P=Mi.transformPoint(new DOMPoint(m.l+ox*cr.w,m.t+oy*cr.h));x=P.x;y=P.y}
+    const t=types[(r()*types.length)|0];
+    add.push({kind:'sticker',id:nextId++,type:t,x,y,s:w*(t==='dot'?2.2:2+r()*2.4),rot:upright()+(r()-.5)*.6,color:col,glow:S.glow,texture:S.texture==='glitter'?'smooth':S.texture});
+  }
+  snap();items.push(...add);rebuild();scheduleSave();
+};
+
+/* ---------- text sheet ---------- */
+let tEdit=null,tPos=null,tFont='hand';
+function openText(it,p){
+  tEdit=it;tPos=p||null;tFont=it?.font||S.font;$('#tTitle').textContent=it?'修改文字':'加入文字';$('#tinput').value=it?.text||'';
+  $$('#tfonts .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===tFont));
+  $('#tsheet').hidden=false;setTimeout(()=>$('#tinput').focus(),30);
+}
+$('#tcancel').onclick=()=>{$('#tsheet').hidden=true};
+$('#tok').onclick=()=>{
+  const txt=$('#tinput').value.replace(/\s+$/,'').replace(/^\s+/,'');$('#tsheet').hidden=true;if(!txt)return;
+  snap();let it=tEdit;
+  if(it){it.text=txt;it.font=tFont}
+  else{let p=tPos;if(!p){const o=outSize(),q=viewMatrix().inverse().transformPoint(new DOMPoint(o.w/2,o.h/2));p={x:q.x,y:q.y}}
+    it={kind:'text',id:nextId++,text:txt,font:tFont,x:p.x,y:p.y,s:S.width*unit()*9,rot:upright(),color:S.color,glow:S.glow};items.push(it)}
+  S.font=tFont;sel=it.id;syncUI();rebuild();scheduleSave();
+  if(document.fonts)document.fonts.load(fontStr(it),txt).then(()=>rebuild()).catch(()=>{});
+};
+
+/* ---------- tray UI ---------- */
+function preview(canvas,fn){const d=devicePixelRatio||1,w=canvas.clientWidth||parseFloat(getComputedStyle(canvas).width)||52,h=canvas.clientHeight||parseFloat(getComputedStyle(canvas).height)||30;canvas.width=w*d;canvas.height=h*d;const c=canvas.getContext('2d');c.scale(d,d);fn(c,w,h)}
+function chips(row,list,key,cls,draw,onPick){
+  list.forEach(([id,label])=>{
+    const b=document.createElement('button');b.className='chip'+(cls?' '+cls:'');b.dataset.id=id;
+    if(draw){const c=document.createElement('canvas');b.append(c);b._draw=()=>preview(c,(g,w,h)=>draw(g,w,h,id))}
+    b.append(label);row.append(b);
+    b.onclick=()=>{if(key)S[key]=id;row.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x===b));onPick&&onPick(id);scheduleSave()};
+  });
+}
+function refreshPreviews(){$$('.chip').forEach(b=>b._draw&&b.offsetParent&&b._draw())}
+function wavePts(w,h){const pts=[];for(let x=6;x<=w-6;x+=2)pts.push({x,y:h/2+Math.sin(x/9)*3});return pts}
+chips($('#styles'),STYLES,'style','',(g,w,h,id)=>drawStroke(g,{pts:wavePts(w,h),style:id,texture:S.texture,color:S.color,w:id==='double'?2.4:2.6,glow:false,seed:7}));
+chips($('#stickers'),STICKERS,'sticker','st',(g,w,h,id)=>drawSticker(g,{type:id,x:w/2,y:h/2,s:Math.min(w,h)*.36,rot:0,color:S.color,glow:false,texture:'smooth'},false));
+TEXTURES.forEach(([id,label])=>{const b=document.createElement('button');b.textContent=label;b.dataset.id=id;b.onclick=()=>{S.texture=id;syncUI();refreshPreviews();scheduleSave()};$('#textures').append(b)});
+function fontChips(row,smp,onPick){FONTS.forEach(F=>{const b=document.createElement('button');b.className='chip font';b.dataset.id=F.id;const s=document.createElement('span');s.className='smp';s.textContent=smp(F);s.style.fontFamily=F.fam+',sans-serif';s.style.fontWeight=F.w;b.append(s,F.name);b.onclick=()=>{row.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x===b));onPick(F.id)};row.append(b)})}
+const textSmp=F=>F.cjk?'花Aa':'Aa';
+fontChips($('#fontsRow'),textSmp,id=>{S.font=id;const it=getSel();if(it?.kind==='text'&&it.font!==id){snap();it.font=id;rebuild();document.fonts?.load(fontStr(it),it.text).then(rebuild).catch(()=>{})}scheduleSave()});
+fontChips($('#tfonts'),textSmp,id=>{tFont=id});
+fontChips($('#codeFonts'),()=>'#F6D24A',id=>{snap();FR.font=id;rebuild();scheduleSave();document.fonts?.load(fontStr({font:id,s:40}),'#0123456789ABCDEF').then(rebuild).catch(()=>{})});
+chips($('#aspects'),ASPECTS,null,'txt',null,id=>{snap();V.aspect=id;if(id!=='free')V.crop=maxCrop(id);render();scheduleSave()});
+
+/* ---------- sliders (double-tap the number to reset) ---------- */
+function slider(box,o){
+  const d=document.createElement('div');d.className='sl';
+  d.innerHTML=`<div class="top"><span>${o.label}</span><output tabindex="0" role="button" title="點兩下回到預設值（${o.def}）"></output></div><input type="range" min="${o.min}" max="${o.max}" step="${o.step||1}" aria-label="${o.label}">`;
+  box.append(d);const inp=d.querySelector('input'),out=d.querySelector('output');
+  const sync=()=>{const v=o.get();inp.value=v;out.textContent=o.fmt(v);out.classList.toggle('changed',v!==o.def)};
+  let active=false;
+  inp.addEventListener('input',()=>{if(!active){active=true;snap()}o.set(+inp.value);sync();o.after()});
+  inp.addEventListener('change',()=>{active=false;scheduleSave()});
+  const reset=()=>{if(o.get()===o.def)return;snap();o.set(o.def);sync();o.after();scheduleSave();out.classList.add('flash');setTimeout(()=>out.classList.remove('flash'),350)};
+  let last=0;out.addEventListener('pointerup',e=>{if(e.timeStamp-last<350){reset();last=0}else last=e.timeStamp});
+  out.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();reset()}});
+  return sync;
+}
+
+/* ---------- colour-keep panel ---------- */
+function keepTouched(){if(!K.on){K.on=true;$('#keepOn').checked=true;renderColors()}scheduleRebuild();syncFrameUI()}
+const KS=[['tol','色相範圍',2,90,v=>'±'+v+'°'],['soft','邊緣柔和',0,60,v=>v+'°'],['sat','飽和度門檻',0,60,v=>v+'%'],['boost','鮮豔度',50,180,v=>v+'%']];
+const keepSyncs=KS.map(([k,label,min,max,fmt])=>slider($('#ksliders'),{label,min,max,def:KDEF[k],fmt,get:()=>K.colors[K.active].p[k],set:v=>K.colors[K.active].p[k]=v,after:keepTouched}));
+keepSyncs.push(slider($('#ksliders'),{label:'黑白對比',min:50,max:180,def:110,fmt:v=>v+'%',get:()=>K.con,set:v=>K.con=v,after:keepTouched}));
+function syncKeepUI(){
+  $('#keepOn').checked=K.on;const box=$('#kchips');box.innerHTML='';
+  K.colors.forEach((C,i)=>{const b=document.createElement('button');b.className='kchip';b.setAttribute('aria-pressed',i===K.active);
+    b.innerHTML=`<i style="background:${kHex(C)}"></i>${kHex(C)}`+(K.colors.length>1?'<b data-x aria-label="移除這個顏色">×</b>':'');
+    b.onclick=e=>{if(e.target.closest('[data-x]')){snap();K.colors.splice(i,1);K.active=Math.min(K.active,K.colors.length-1);scheduleRebuild();renderColors();syncFrameUI();scheduleSave()}else K.active=i;syncKeepUI()};
+    box.append(b)});
+  $('#kadd').disabled=K.colors.length>=4;keepSyncs.forEach(f=>f());
+}
+$('#keepOn').onchange=e=>{snap();K.on=e.target.checked;scheduleRebuild();renderColors();syncFrameUI();scheduleSave()};
+$('#kadd').onclick=()=>{if(K.colors.length>=4)return;snap();const C=K.colors[K.active];K.colors.push({h:C.h,rgb:[...C.rgb],p:{...KDEF}});K.active=K.colors.length-1;syncKeepUI();scheduleSave();
+  status(`新增了第 ${K.colors.length} 個顏色，點照片選取要保留的顏色`,3000)};
+
+/* ---------- frame panel ---------- */
+let viewPending=false;function scheduleView(){if(viewPending)return;viewPending=true;requestAnimationFrame(()=>{viewPending=false;applyView()})}
+chips($('#framePresets'),FRAMES,null,'txt',null,id=>{const f=FRAMES.find(x=>x[0]===id);snap();FR.pad=f[2];FR.bot=f[3];FR.code=f[4];syncFrameUI();applyView()});
+FCOLORS.forEach(([id,label,col])=>{
+  const b=document.createElement(id==='custom'?'label':'button');b.className='chip fc';b.dataset.id=id;b.innerHTML=`<i style="background:${col||'#E8E1D4'}"></i>${label}`;
+  if(id==='custom'){const inp=document.createElement('input');inp.type='color';inp.id='fcustom';inp.setAttribute('aria-label','自訂外框顏色');
+    let first=true;inp.oninput=e=>{if(first){snap();first=false}FR.custom=e.target.value.toUpperCase();FR.mode='custom';syncFrameUI();scheduleRebuild()};
+    inp.onchange=()=>{first=true;scheduleSave()};b.append(inp)}
+  else b.onclick=()=>{snap();FR.mode=id;syncFrameUI();rebuild();scheduleSave()};
+  $('#fcolors').append(b)});
+$('#codeOn').onchange=e=>{snap();FR.code=e.target.checked;syncFrameUI();rebuild();scheduleSave()};
+const frameAfter=()=>{syncFrameUI(false);scheduleView()};
+const frameSyncs=[
+  slider($('#fsliders'),{label:'邊框寬度',min:0,max:20,step:.5,def:5,fmt:v=>v+'%',get:()=>FR.pad,set:v=>FR.pad=v,after:frameAfter}),
+  slider($('#fsliders'),{label:'下方留白',min:0,max:40,def:14,fmt:v=>v+'%',get:()=>FR.bot,set:v=>FR.bot=v,after:frameAfter})];
+function syncFrameUI(sliders=true){
+  $$('#framePresets .chip').forEach(b=>{const f=FRAMES.find(x=>x[0]===b.dataset.id);b.setAttribute('aria-pressed',FR.pad===f[2]&&FR.bot===f[3]&&(!f[2]&&!f[3]||FR.code===f[4]))});
+  $$('#fcolors .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===FR.mode));
+  $('#fcolors [data-id="accent"] i').style.background=mainColor();$('#fcolors [data-id="accent"]').title=K.on?'目前的保留色':'目前的畫筆顏色';
+  $('#fcolors [data-id="custom"] i').style.background=FR.custom;$('#fcustom').value=FR.custom.toLowerCase();
+  $('#codeOn').checked=FR.code;$('#codeFonts').hidden=!FR.code;
+  const smp=codeColors()[0];$$('#codeFonts .chip').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.id===FR.font);b.querySelector('.smp').textContent=smp});
+  if(sliders)frameSyncs.forEach(f=>f());
+}
+PRESETS.forEach(p=>{
+  const b=document.createElement('button');b.className='chip preset';const c=document.createElement('canvas');b.append(c,p.name);$('#presets').append(b);
+  b._draw=()=>preview(c,(g,w,h)=>{g.fillStyle='#2b2a2e';g.fillRect(0,0,w,h);const pts=[];for(let x=10;x<=w-30;x+=2)pts.push({x,y:h*.62+Math.sin(x/8)*4});
+    drawStroke(g,{pts,style:p.style,texture:p.texture,color:p.color,w:2.6,glow:p.glow,seed:5});
+    const sc=p.sprinkle.color||p.color;drawSticker(g,{type:p.sprinkle.types[0],x:w-16,y:h*.32,s:8,rot:0,color:sc,glow:p.glow,texture:'smooth'},false);
+    drawSticker(g,{type:p.sprinkle.types[1],x:w*.3,y:h*.26,s:6,rot:.2,color:sc,glow:p.glow,texture:'smooth'},false)});
+  b.onclick=()=>applyPreset(p);
+});
+TOOLS.forEach(([id,label,svg])=>{const b=document.createElement('button');b.className='tool';b.dataset.id=id;b.innerHTML=`<svg viewBox="0 0 24 24">${svg}</svg>`;b.append(label);b.onclick=()=>setTool(id);$('#tools').append(b)});
+$('#glow').onchange=e=>{S.glow=e.target.checked;scheduleSave()};
+$('#width').oninput=e=>{S.width=+e.target.value;if(gesture===null&&S.tool==='erase')render()};
+$('#width').onchange=()=>scheduleSave();
+
+function setTool(t){
+  const wasCrop=cropMode;S.tool=t;cropMode=t==='crop';S.picking=false;
+  if(!(t==='sticker'||t==='text'))sel=null;
+  $$('[data-panel]').forEach(p=>p.hidden=p.dataset.panel!==t);
+  $$('[data-for]').forEach(el=>el.hidden=!el.dataset.for.split(' ').includes(t));
+  $$('#tools .tool').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===t));
+  $('#sizeLbl').textContent=t==='erase'?'橡皮擦':t==='draw'?'粗細':'大小';
+  if(cropMode){status('拖動四角調整範圍，拉下方刻度可以把照片轉正',3200);syncCropUI()}
+  if(t==='keep'){status(K.on?'點照片換保留色，或用滑桿微調':'點照片上的顏色，只留下那個色，其他變成黑白灰',3200);syncKeepUI()}
+  if(t==='frame')syncFrameUI();
+  renderColors();
+  requestAnimationFrame(()=>{if(cropMode!==wasCrop||cropMode)applyView();else{fitCss();render()}refreshPreviews()});
+}
+function syncCropUI(){
+  $$('#aspects .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===V.aspect));
+  $('#straight').value=V.straight;$('#angleVal').textContent=fmtAng(V.straight);
+}
+function syncUI(){
+  $$('#styles .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===S.style));
+  $$('#stickers .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===S.sticker));
+  $$('#textures button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===S.texture));
+  $$('#fontsRow .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===S.font));
+  $('#glow').checked=S.glow;$('#width').value=S.width;
+  renderColors();if(V)syncCropUI();syncKeepUI();syncFrameUI();refreshPreviews();
+}
+const holdOn=e=>{e.preventDefault();if(showOrig)return;showOrig=true;rebuild()},holdOff=()=>{if(!showOrig)return;showOrig=false;rebuild()};
+$('#hold').addEventListener('pointerdown',holdOn);['pointerup','pointerleave','pointercancel'].forEach(t=>$('#hold').addEventListener(t,holdOff));
+$('#hold').addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter')holdOn(e)});$('#hold').addEventListener('keyup',holdOff);
+document.addEventListener('keydown',e=>{
+  if(!$('#tsheet').hidden||e.target.closest?.('input,textarea'))return;
+  if((e.key==='Delete'||e.key==='Backspace')&&getSel()){snap();items=items.filter(i=>i.id!==sel);sel=null;rebuild();scheduleSave()}
+});
+
+/* ---------- photo in / image out ---------- */
+function loadImage(src){return new Promise((res,rej)=>{const img=new Image();img.onload=()=>res(img);img.onerror=rej;img.src=src})}
+async function usePhoto(img){
+  const k=Math.min(1,2400/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height));
+  photo.width=Math.round((img.naturalWidth||img.width)*k);photo.height=Math.round((img.naturalHeight||img.height)*k);pctx.drawImage(img,0,0,photo.width,photo.height);
+  KD=null;kKey='';
+}
+$('#file').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  const url=URL.createObjectURL(f);
+  try{const img=await loadImage(url);await usePhoto(img);
+    photoBlob=await new Promise(r=>photo.toBlob(r,'image/jpeg',.92));
+    V=null;V=defaultView();items=[];undoStack=[];sel=null;zoom={z:1,x:0,y:0};hasPhoto=true;
+    // keep the black-and-white look only if the person is working in the colour-keep tool right now
+    const keeping=S.tool==='keep';K.on=K.on&&keeping;
+    $('#badge').hidden=true;syncCropUI();syncKeepUI();syncFrameUI();renderColors();applyView();scheduleSave();
+    status(keeping?'照片放好了，點照片上的顏色來選取要保留的部分':'照片放好了，想先轉正或裁切可以點「裁切」，想黑白留色可以點「留色」',3200);
+  }catch(err){status('這張照片打不開，換一張試試',3000)}finally{URL.revokeObjectURL(url)}
+};
+let outUrl=null,outFile=null;
+$('#save').onclick=async()=>{
+  const o=outSize(),c=document.createElement('canvas');c.width=o.w;c.height=o.h;renderScene(c.getContext('2d'));
+  const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.93));if(!blob){status('存圖失敗，請再試一次');return}
+  const d=new Date(),p=n=>String(n).padStart(2,'0'),name=`keepsake-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.jpg`;
+  if(outUrl)URL.revokeObjectURL(outUrl);outUrl=URL.createObjectURL(blob);
+  outFile=new File([blob],name,{type:'image/jpeg'});
+  let canShare=false;try{canShare=!!(navigator.canShare&&navigator.canShare({files:[outFile]}))}catch(e){}
+  $('#out').src=outUrl;$('#download').href=outUrl;$('#download').download=name;$('#share').hidden=!canShare;
+  $('#sheet').hidden=false;
+};
+$('#share').onclick=()=>{navigator.share({files:[outFile]}).catch(e=>{if(e&&e.name!=='AbortError')status('分享沒有成功，可以改用「下載圖片」或長按圖片儲存',3500)})};
+$('#close').onclick=()=>$('#sheet').hidden=true;
+
+/* ---------- sample scene (drawn in code, no photo) ---------- */
 function sample(){
-  const c=document.createElement('canvas');c.width=800;c.height=560;const g=c.getContext('2d');
-  let s=7;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
-  let gr=g.createLinearGradient(0,0,0,560);gr.addColorStop(0,'#9db3c4');gr.addColorStop(.6,'#c9d2d6');gr.addColorStop(1,'#6e7376');g.fillStyle=gr;g.fillRect(0,0,800,560);
-  const bc=['#8a6f5a','#6f7d86','#a39785','#5d6a5a','#b58f6a'];
-  for(let x=0;x<800;){const w=90+rnd()*90,h=180+rnd()*170;g.fillStyle=bc[(rnd()*bc.length)|0];g.fillRect(x,380-h,w,h+20);
-    g.fillStyle='rgba(30,40,50,.45)';for(let wy=380-h+16;wy<370;wy+=34)for(let wx=x+12;wx<x+w-20;wx+=28)g.fillRect(wx,wy,14,20);x+=w+4}
-  g.fillStyle='#4f5456';g.fillRect(0,390,800,170);
-  g.fillStyle='rgba(255,255,255,.12)';for(let i=0;i<8;i++)g.fillRect(i*110,470,60,8);
-  [[70,330,'#3f7d3a'],[120,300,'#4d8f40'],[720,320,'#3e7a3a']].forEach(([x,y,col])=>{g.fillStyle='#5a4030';g.fillRect(x-6,y,12,90);g.fillStyle=col;g.beginPath();g.arc(x,y,55,0,7);g.fill()});
-  g.fillStyle='#e2b42a';g.fillRect(560,372,170,62);g.fillRect(590,346,100,30);g.fillStyle='#2b2b2b';g.beginPath();g.arc(600,436,16,0,7);g.arc(690,436,16,0,7);g.fill();
-  g.fillStyle='#2e5fa8';g.fillRect(200,400,60,40);
-  g.fillStyle='#2a2826';g.fillRect(385,380,30,110);g.beginPath();g.arc(400,366,16,0,7);g.fill();
-  g.strokeStyle='#222';g.lineWidth=4;g.beginPath();g.moveTo(400,300);g.lineTo(400,385);g.stroke();
-  g.fillStyle='#d0342c';g.beginPath();g.moveTo(320,330);g.quadraticCurveTo(400,240,480,330);g.closePath();g.fill();
-  g.fillStyle='#a8241f';g.beginPath();g.moveTo(400,268);g.quadraticCurveTo(410,300,400,330);g.quadraticCurveTo(390,300,400,268);g.fill();
-  g.strokeStyle='rgba(230,235,240,.35)';g.lineWidth=1;for(let i=0;i<260;i++){const x=rnd()*800,y=rnd()*560;g.beginPath();g.moveTo(x,y);g.lineTo(x-6,y+18);g.stroke()}
-  load(c);
+  photo.width=900;photo.height=1300;const c=pctx,r=rng(42);
+  c.fillStyle='#2b2a2e';c.fillRect(0,0,900,1300);
+  for(let i=0;i<14000;i++){c.fillStyle=r()<.5?'rgba(255,255,255,.07)':'rgba(0,0,0,.28)';const s=1+r()*2.5;c.fillRect(r()*900,r()*1300,s,s)}
+  c.save();c.rotate(-.35);c.fillStyle='rgba(255,226,170,.07)';for(let i=0;i<4;i++)c.fillRect(-200,180+i*260,1400,70);c.restore();
+  c.save();c.lineCap='round';c.strokeStyle='#d6bf9b';c.lineWidth=230;c.beginPath();c.moveTo(560,1080);c.lineTo(1000,1450);c.stroke();
+  c.strokeStyle='rgba(120,96,64,.25)';c.lineWidth=3;for(let i=0;i<22;i++){c.beginPath();c.moveTo(500+i*22,1010+i*18);c.lineTo(420+i*22,1110+i*18);c.stroke()}c.restore();
+  c.strokeStyle='#7fa34a';c.lineWidth=12;c.lineCap='round';
+  const heads=[[330,470,120],[565,440,112],[445,660,128],[640,640,96],[300,720,88]];
+  for(const[x,y]of heads){c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(470,860,480,1180);c.stroke()}
+  c.fillStyle='#e7b48f';c.beginPath();c.ellipse(482,965,52,62,.2,0,7);c.fill();
+  for(const[x,y,a]of[[200,620,-.7],[720,560,.6],[250,820,-.3],[690,780,.5],[440,330,0]]){c.save();c.translate(x,y);c.rotate(a);const g=c.createLinearGradient(-90,0,90,0);g.addColorStop(0,'#5f8a3a');g.addColorStop(1,'#a9c76a');c.fillStyle=g;c.beginPath();c.ellipse(0,0,95,42,0,0,7);c.fill();c.strokeStyle='rgba(40,70,20,.5)';c.lineWidth=3;c.beginPath();c.moveTo(-85,0);c.lineTo(85,0);c.stroke();c.restore()}
+  for(const[x,y,R]of heads){
+    for(const[layer,col,n,len]of[[0,'#e9a31b',20,1],[1,'#f8cd3c',18,.86]])for(let i=0;i<n;i++){c.save();c.translate(x,y);c.rotate(i*Math.PI*2/n+layer*.17+(r()-.5)*.08);const g=c.createLinearGradient(0,0,0,-R);g.addColorStop(0,'#c97d10');g.addColorStop(1,col);c.fillStyle=g;c.beginPath();c.ellipse(0,-R*.62*len,R*.15,R*.42*len,0,0,7);c.fill();c.restore()}
+    const g=c.createRadialGradient(x,y,2,x,y,R*.38);g.addColorStop(0,'#2a160a');g.addColorStop(1,'#5a3214');c.fillStyle=g;c.beginPath();c.arc(x,y,R*.38,0,7);c.fill();
+    c.fillStyle='rgba(150,90,30,.55)';for(let i=0;i<70;i++){const a=i*2.4,d=Math.sqrt(i/70)*R*.34;c.beginPath();c.arc(x+Math.cos(a)*d,y+Math.sin(a)*d,2.2,0,7);c.fill()}
+  }
+  V=defaultView();KD=null;kKey='';
+  // demo both halves: sunflower yellow kept in colour, everything else black and white
+  K={on:true,con:110,active:0,colors:[{h:44,rgb:[246,196,52],p:{...KDEF}}]};
+  const loop=[],n=noise1(9);for(let t=0;t<=1.02;t+=.008){const a=-Math.PI*.62+t*Math.PI*1.9,k=1+n(t*6)*.08;loop.push({x:470+Math.cos(a)*330*k,y:610+Math.sin(a)*390*k})}
+  const Y='#F6D24A',st=(type,x,y,s,rot)=>({kind:'sticker',id:nextId++,type,x,y,s,rot,color:Y,glow:true,texture:'smooth'});
+  items=[{kind:'stroke',id:nextId++,pts:loop,style:'wavy',texture:'glitter',color:Y,w:7.8,glow:true,seed:3},
+    st('star',150,230,46,-.2),st('sparkle',250,200,30,0),st('smile',740,240,52,.1),st('sparkle',780,900,34,.1),st('dot',820,380,20,0),st('plus',110,880,24,.3),st('sparkle',120,1050,26,0),
+    {kind:'text',id:nextId++,text:'今天的花',font:'hand',x:690,y:1200,s:58,rot:-.08,color:'#FFFFFF',glow:false}];
 }
-chips();sample();
-})();
-</script>
 
+/* ---------- start ---------- */
+(async()=>{
+  let restored=false;
+  try{
+    const st=await DB.get('settings');if(st){const{FR:f,...rest}=st;Object.assign(S,rest,{tool:'draw',picking:false});if(f)FR={...FR,...f}}
+    const d=await DB.get('draft');
+    if(d?.photo){const url=URL.createObjectURL(d.photo);const img=await loadImage(url);URL.revokeObjectURL(url);await usePhoto(img);
+      photoBlob=d.photo;items=d.items||[];V=d.V;hasPhoto=true;restored=true;
+      if(d.K)K=d.K;if(d.FR)FR={...FR,...d.FR};nextId=Math.max(0,...items.map(i=>i.id||0))+1;$('#badge').hidden=true}
+  }catch(e){}
+  if(!restored)sample();
+  syncUI();setTool('draw');applyView();
+  if(restored)status('已還原上次的編輯，換照片會開始新的作品',3200);
+  if(document.fonts){Promise.all(FONTS.map(F=>document.fonts.load(`${F.w} 40px ${F.fam}`,'花Aa今天#0123456789ABCDEF'))).then(()=>{refreshPreviews();rebuild()}).catch(()=>{});
+    const texts=items.filter(i=>i.kind==='text');Promise.all(texts.map(t=>document.fonts.load(fontStr(t),t.text))).then(()=>rebuild()).catch(()=>{})}
+})();
+
+/* ---------- app shell: offline + no page zoom on iOS ---------- */
+document.addEventListener('gesturestart',e=>e.preventDefault());
+document.addEventListener('dblclick',e=>{if(e.target.closest('.app'))e.preventDefault()},{passive:false});
+if('serviceWorker' in navigator&&window.isSecureContext)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
 </body>
 </html>
