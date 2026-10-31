@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Huninn&family=Caveat:wght@500;700&family=IBM+Plex+Mono:wght@500&family=Space+Mono&family=Courier+Prime&family=DM+Mono&family=Playfair+Display:wght@500&family=Josefin+Sans:wght@500&family=Shadows+Into+Light&family=Playwrite+AR+Guides&display=swap">
 <style>
-/* Layout: one-screen phone photo editor — slim header, photo stage in the middle, option tray + eight-tool bar docked at the bottom; on wide screens the tray becomes a side panel. Single warm-dark "darkroom" look on purpose so photos and doodle colors pop. */
+/* Layout: one-screen phone photo editor — slim header, photo stage in the middle, option tray + tool bar docked at the bottom; on wide screens the tray becomes a side panel. Flow: home (pick 留色 or 花邊) → crop → edit → frame → export. Single warm-dark "darkroom" look on purpose so photos and doodle colors pop. */
 :root{
   --bg:#1c1a1f; --tray:#262329; --chip:#322e36; --line:#423d47;
   --fg:#f4ede4; --muted:#a79eac; --accent:#f6d24a; --pink:#f28bb5; --danger:#e0546f;
@@ -87,7 +87,7 @@ canvas#cv{display:block;border-radius:4px;box-shadow:0 10px 30px rgba(0,0,0,.45)
   repeating-linear-gradient(90deg,var(--muted) 0 1px,transparent 1px 9px) center/100% 8px no-repeat;opacity:.95}
 #straight::-webkit-slider-thumb{-webkit-appearance:none;width:4px;height:26px;border-radius:2px;background:var(--accent);border:0}
 #straight::-moz-range-thumb{width:4px;height:26px;border-radius:2px;background:var(--accent);border:0}
-.tools{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:2px;border-top:1px solid var(--line);padding-top:6px}
+.tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;border-top:1px solid var(--line);padding-top:6px}
 .tool{display:grid;justify-items:center;gap:3px;background:none;border:0;color:var(--muted);font:12px var(--sans);padding:6px 0;border-radius:10px;cursor:pointer;white-space:nowrap;min-width:0}
 .kchips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
 .kchips::-webkit-scrollbar{display:none}
@@ -111,8 +111,9 @@ canvas#cv{display:block;border-radius:4px;box-shadow:0 10px 30px rgba(0,0,0,.45)
   header{grid-column:1/-1;padding-inline:0}
   .stage{grid-row:2;padding-inline:0}
   .tray{grid-row:2;grid-column:2;border:1px solid var(--line);border-radius:18px;align-content:start;overflow-y:auto;padding:14px 16px}
-  .tools{order:-1;grid-template-columns:repeat(4,minmax(0,1fr));border-top:0;border-bottom:1px solid var(--line);padding:0 0 8px}
+  .tools{order:-1;grid-template-columns:repeat(5,minmax(0,1fr));border-top:0;border-bottom:1px solid var(--line);padding:0 0 8px}
   .row,.colors,.kchips{flex-wrap:wrap;overflow:visible}
+  .steps button{font-size:17px;padding:6px 8px}
 }
 .tool[aria-pressed="true"]{color:var(--accent);background:var(--chip)}
 .sheet{position:fixed;inset:0;z-index:20;background:rgba(10,8,12,.88);display:grid;place-items:center;gap:12px;align-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
@@ -127,23 +128,41 @@ canvas#cv{display:block;border-radius:4px;box-shadow:0 10px 30px rgba(0,0,0,.45)
 @media (prefers-reduced-motion:no-preference){.chip,.sw,.btn,.tool{transition:border-color .15s,background-color .15s,transform .1s}.btn:active{transform:scale(.97)}}
 .sheet-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 a.btn{text-decoration:none}
+.steps{display:flex;align-items:center;justify-content:center;gap:0;flex:1;min-width:0}
+header:has(.steps){gap:6px}
+header #next{padding-inline:12px}
+.steps button{background:none;border:0;color:var(--muted);font:700 14px var(--hand);padding:6px 2px;cursor:pointer;white-space:nowrap;letter-spacing:.04em}
+.steps button[aria-current="step"]{color:var(--accent)}
+.steps i{color:var(--muted);opacity:.5;font-style:normal;font-size:12px}
+.home{position:fixed;inset:0;z-index:15;background:var(--bg);overflow-y:auto;display:grid;grid-template-columns:minmax(0,1fr);align-content:center;justify-items:center;gap:16px;padding:calc(24px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.brand{display:grid;justify-items:center;gap:4px}
+.brand h1{font-size:36px;flex:none;overflow:visible}
+.brand p{margin:0;color:var(--muted);font:16px var(--hand);letter-spacing:.06em}
+.modes{display:grid;gap:12px;width:100%;max-width:560px;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr))}
+.mode{display:grid;gap:4px;text-align:left;background:var(--tray);border:1.5px solid var(--line);border-radius:18px;padding:12px 12px 14px;color:var(--fg);cursor:pointer;font-family:var(--sans)}
+.mode:hover{border-color:var(--accent)}
+.mode canvas{width:100%;height:118px;border-radius:12px;display:block;margin-bottom:6px}
+.mode b{font:700 21px var(--hand);letter-spacing:.06em}
+.mode span{font-size:13px;color:var(--muted)}
+.links{margin:0;font-size:13px;color:var(--muted);text-align:center}
+.linkbtn{background:none;border:0;color:var(--accent);font:inherit;cursor:pointer;padding:4px 2px;text-decoration:underline;text-underline-offset:3px}
 </style>
 </head>
 <body>
 
 <div class="app">
   <header>
-    <h1><span>Keep</span>sake</h1>
-    <label class="btn" for="file">換照片</label>
+    <button class="ibtn" id="back" aria-label="上一步"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <nav class="steps" id="steps" aria-label="步驟"><button data-step="crop">裁切</button><i>›</i><button data-step="edit">留色</button><i>›</i><button data-step="frame">外框</button></nav>
     <input type="file" id="file" accept="image/*" hidden>
     <button class="ibtn" id="hold" aria-label="按住看原圖" title="按住看原圖"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
     <button class="ibtn" id="undo" aria-label="復原"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
-    <button class="btn primary" id="save">存圖</button>
+    <button class="btn primary" id="next">下一步</button>
   </header>
 
   <div class="stage" id="stage">
     <canvas id="cv"></canvas>
-    <div class="pill" id="badge">示範圖片 · 點「換照片」放入你的照片</div>
+    <div class="pill" id="badge" hidden>範例照片 · 回首頁可以換成你的照片</div>
     <div class="pill" id="status" hidden></div>
     <button class="btn sm" id="zoomReset" hidden>還原縮放</button>
   </div>
@@ -171,10 +190,10 @@ a.btn{text-decoration:none}
         <div class="dialbody"><output id="angleVal" title="點一下回到 0°">0°</output><input type="range" id="straight" min="-45" max="45" step="0.5" value="0" aria-label="拉直角度"></div>
         <button class="ibtn" id="flipH" aria-label="水平翻轉"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7l-5 5 5 5z"/><path d="M16 7l5 5-5 5z"/></svg></button>
       </div>
-      <div class="line2"><p class="hint">拖動四角調整範圍，拉刻度把照片轉正。</p><button class="btn sm" id="cropReset">重設</button></div>
+      <div class="line2"><p class="hint">拖四角裁切、拉刻度轉正；不需要就按「下一步」。</p><button class="btn sm" id="repick">換一張</button><button class="btn sm" id="cropReset">重設</button></div>
     </section>
     <section data-panel="keep" hidden>
-      <div class="line2"><label class="glow"><input type="checkbox" id="keepOn">黑白留色</label><div class="kchips" id="kchips" aria-label="保留的顏色"></div><button class="btn sm" id="kadd">＋顏色</button></div>
+      <div class="line2"><div class="kchips" id="kchips" aria-label="保留的顏色"></div><button class="btn sm" id="kadd">＋顏色</button></div>
       <div class="sliders" id="ksliders"></div>
       <p class="hint">點照片選要保留的顏色，其他變成黑白灰。點上方色塊切換要調整哪個顏色；數值點兩下回預設。</p>
     </section>
@@ -201,7 +220,17 @@ a.btn{text-decoration:none}
     <a class="btn" id="download" href="#" download="keepsake.jpg">下載圖片</a>
   </div>
   <small>也可以長按圖片，選「加入照片」</small>
-  <button class="btn" id="close">回去繼續編輯</button>
+  <button class="btn" id="close">回去調整</button>
+</div>
+
+<div class="home" id="home">
+  <div class="brand"><h1><span>Keep</span>sake</h1><p>把照片變成值得留下的紀念</p></div>
+  <div class="modes">
+    <button class="mode" data-mode="keep"><canvas id="mKeep"></canvas><b>留色</b><span>只留下想要的顏色，其他變成黑白</span></button>
+    <button class="mode" data-mode="doodle"><canvas id="mDoodle"></canvas><b>花邊</b><span>畫上手繪花邊、貼圖和文字</span></button>
+  </div>
+  <button class="btn" id="resume" hidden>繼續上次的作品</button>
+  <p class="links">沒有照片？用範例試試：<button class="linkbtn" data-sample="keep">留色</button>・<button class="linkbtn" data-sample="doodle">花邊</button></p>
 </div>
 
 <div class="tsheet" id="tsheet" hidden>
@@ -222,6 +251,9 @@ const measure=document.createElement('canvas').getContext('2d');
 
 let items=[],undoStack=[],nextId=1,V=null,photoBlob=null,hasPhoto=false;
 let sel=null,live=null,liveIds=new Set(),cropMode=false,cropDrag=null,zoom={z:1,x:0,y:0},showOrig=false;
+// flow: home → crop → edit → frame → export. mode decides what the edit step is: 'keep' (留色) or 'doodle' (花邊)
+const STEPS=['crop','edit','frame'];
+let step='home',mode='doodle',pendingMode='doodle',savedStep='edit',lastDoodle='draw';
 const S={tool:'draw',style:'hand',texture:'smooth',color:'#F6D24A',width:6,glow:true,sticker:'paw',font:'hand',sprinkle:null,recent:[],picking:false};
 /* K: black-and-white colour keep (up to 4 kept colours, each with its own sliders). FR: frame geometry is % of the photo's short side. */
 const KDEF={tol:22,soft:14,sat:15,boost:100};
@@ -263,9 +295,6 @@ const TOOLS=[
   ['sticker','貼圖','<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/>'],
   ['text','文字','<path d="M5 7V4h14v3"/><path d="M12 4v16"/><path d="M9 20h6"/>'],
   ['erase','橡皮擦','<path d="M7 20h12"/><path d="M4.5 14.5l9-9a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L12 17H7z"/>'],
-  ['keep','留色','<path d="M12 3c3.6 4.3 6 7.5 6 10.6a6 6 0 0 1-12 0C6 10.5 8.4 7.3 12 3z"/><path d="M12 3v16.6"/>'],
-  ['crop','裁切','<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M2 6h14a2 2 0 0 1 2 2v14"/>'],
-  ['frame','外框','<rect x="4" y="3" width="16" height="18" rx="1.5"/><rect x="7" y="6" width="10" height="9"/>'],
   ['style','風格','<path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.7-.8 1.7-1.6 0-1.2-1-1.6-1-2.6 0-.9.7-1.5 1.6-1.5H17a4 4 0 0 0 4-4c0-4.6-4-8.3-9-8.3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>'],
 ];
 
@@ -582,7 +611,7 @@ function settings(){const{tool,picking,...rest}=S;return clone(rest)}
 function scheduleSave(){
   clearTimeout(saveTimer);
   saveTimer=setTimeout(async()=>{try{
-    if(hasPhoto&&photoBlob)await DB.put('draft',{photo:photoBlob,items:clone(items),V:clone(V),K:clone(K),FR:clone(FR),t:Date.now()});
+    if(hasPhoto&&photoBlob)await DB.put('draft',{photo:photoBlob,items:clone(items),V:clone(V),K:clone(K),FR:clone(FR),mode,step:savedStep,t:Date.now()});
     await DB.put('settings',{...settings(),FR:clone(FR)});
   }catch(e){}},700);
 }
@@ -836,19 +865,18 @@ function slider(box,o){
 }
 
 /* ---------- colour-keep panel ---------- */
-function keepTouched(){if(!K.on){K.on=true;$('#keepOn').checked=true;renderColors()}scheduleRebuild();syncFrameUI()}
+function keepTouched(){K.on=true;scheduleRebuild();syncFrameUI()}
 const KS=[['tol','色相範圍',2,90,v=>'±'+v+'°'],['soft','邊緣柔和',0,60,v=>v+'°'],['sat','飽和度門檻',0,60,v=>v+'%'],['boost','鮮豔度',50,180,v=>v+'%']];
 const keepSyncs=KS.map(([k,label,min,max,fmt])=>slider($('#ksliders'),{label,min,max,def:KDEF[k],fmt,get:()=>K.colors[K.active].p[k],set:v=>K.colors[K.active].p[k]=v,after:keepTouched}));
 keepSyncs.push(slider($('#ksliders'),{label:'黑白對比',min:50,max:180,def:110,fmt:v=>v+'%',get:()=>K.con,set:v=>K.con=v,after:keepTouched}));
 function syncKeepUI(){
-  $('#keepOn').checked=K.on;const box=$('#kchips');box.innerHTML='';
+  const box=$('#kchips');box.innerHTML='';
   K.colors.forEach((C,i)=>{const b=document.createElement('button');b.className='kchip';b.setAttribute('aria-pressed',i===K.active);
     b.innerHTML=`<i style="background:${kHex(C)}"></i>${kHex(C)}`+(K.colors.length>1?'<b data-x aria-label="移除這個顏色">×</b>':'');
     b.onclick=e=>{if(e.target.closest('[data-x]')){snap();K.colors.splice(i,1);K.active=Math.min(K.active,K.colors.length-1);scheduleRebuild();renderColors();syncFrameUI();scheduleSave()}else K.active=i;syncKeepUI()};
     box.append(b)});
   $('#kadd').disabled=K.colors.length>=4;keepSyncs.forEach(f=>f());
 }
-$('#keepOn').onchange=e=>{snap();K.on=e.target.checked;scheduleRebuild();renderColors();syncFrameUI();scheduleSave()};
 $('#kadd').onclick=()=>{if(K.colors.length>=4)return;snap();const C=K.colors[K.active];K.colors.push({h:C.h,rgb:[...C.rgb],p:{...KDEF}});K.active=K.colors.length-1;syncKeepUI();scheduleSave();
   status(`新增了第 ${K.colors.length} 個顏色，點照片選取要保留的顏色`,3000)};
 
@@ -891,14 +919,15 @@ $('#width').onchange=()=>scheduleSave();
 
 function setTool(t){
   const wasCrop=cropMode;S.tool=t;cropMode=t==='crop';S.picking=false;
+  if(TOOLS.some(x=>x[0]===t))lastDoodle=t;
   if(!(t==='sticker'||t==='text'))sel=null;
   $$('[data-panel]').forEach(p=>p.hidden=p.dataset.panel!==t);
   $$('[data-for]').forEach(el=>el.hidden=!el.dataset.for.split(' ').includes(t));
   $$('#tools .tool').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===t));
   $('#sizeLbl').textContent=t==='erase'?'橡皮擦':t==='draw'?'粗細':'大小';
   if(cropMode){status('拖動四角調整範圍，拉下方刻度可以把照片轉正',3200);syncCropUI()}
-  if(t==='keep'){status(K.on?'點照片換保留色，或用滑桿微調':'點照片上的顏色，只留下那個色，其他變成黑白灰',3200);syncKeepUI()}
-  if(t==='frame')syncFrameUI();
+  if(t==='keep'){status('點照片上的顏色，只留下那個色，其他變成黑白灰',3200);syncKeepUI()}
+  if(t==='frame'){status('選好外框樣式後，按右上角「匯出」',3200);syncFrameUI()}
   renderColors();
   requestAnimationFrame(()=>{if(cropMode!==wasCrop||cropMode)applyView();else{fitCss();render()}refreshPreviews()});
 }
@@ -929,20 +958,61 @@ async function usePhoto(img){
   photo.width=Math.round((img.naturalWidth||img.width)*k);photo.height=Math.round((img.naturalHeight||img.height)*k);pctx.drawImage(img,0,0,photo.width,photo.height);
   KD=null;kKey='';
 }
+/* ---------- flow: home → crop → edit → frame ---------- */
+const modeName=()=>mode==='keep'?'留色':'花邊';
+function freshWork(m){
+  mode=m;V=defaultView();items=[];undoStack=[];sel=null;zoom={z:1,x:0,y:0};$('#undo').disabled=true;
+  K.on=m==='keep';if(K.on)K.active=Math.min(K.active,K.colors.length-1);
+  syncCropUI();syncKeepUI();syncFrameUI();renderColors();
+}
+function goStep(s){
+  step=s;$('#home').hidden=s!=='home';
+  if(s==='home'){$('#resume').hidden=!hasPhoto;$('#resume').textContent=`繼續上次的作品（${modeName()}）`;status('');return}
+  savedStep=s;zoom={z:1,x:0,y:0};
+  $('#steps [data-step="edit"]').textContent=modeName();
+  $$('#steps button').forEach(b=>b.setAttribute('aria-current',b.dataset.step===s?'step':'false'));
+  $('#hold').hidden=s==='crop';$('#next').textContent=s==='frame'?'匯出':'下一步';
+  $('#tools').hidden=!(s==='edit'&&mode==='doodle');
+  setTool(s==='crop'?'crop':s==='frame'?'frame':mode==='keep'?'keep':lastDoodle);
+  scheduleSave();
+}
+function drawModeCards(){
+  preview($('#mKeep'),(g,w,h)=>{ // grey rainy street, one red umbrella
+    const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#c4c4c4');gr.addColorStop(1,'#6a6a6a');g.fillStyle=gr;g.fillRect(0,0,w,h);
+    for(let x=0,i=0;x<w;i++){const bw=34+(i*37)%26,bh=38+(i*53)%44;g.fillStyle=['#8a8a8a','#757575','#9b9b9b'][i%3];g.fillRect(x,h*.74-bh,bw,bh);x+=bw+3}
+    g.fillStyle='#4c4c4c';g.fillRect(0,h*.74,w,h);
+    const cx=w*.5,cy=h*.6;g.fillStyle='#2a2a2a';g.fillRect(cx-4,cy,8,h*.3);g.beginPath();g.arc(cx,cy-4,6,0,7);g.fill();
+    g.strokeStyle='#222';g.lineWidth=2;g.beginPath();g.moveTo(cx,cy-36);g.lineTo(cx,cy);g.stroke();
+    g.fillStyle='#d0342c';g.beginPath();g.moveTo(cx-38,cy-18);g.quadraticCurveTo(cx,cy-66,cx+38,cy-18);g.closePath();g.fill();
+    g.strokeStyle='rgba(255,255,255,.4)';g.lineWidth=1;for(let i=0;i<60;i++){const x=(i*73)%w,y=(i*41)%h;g.beginPath();g.moveTo(x,y);g.lineTo(x-3,y+9);g.stroke()}
+  });
+  preview($('#mDoodle'),(g,w,h)=>{ // glittery doodle loop with stickers
+    g.fillStyle='#2b2a2e';g.fillRect(0,0,w,h);
+    const pts=[];for(let x=26;x<=w-26;x+=2)pts.push({x,y:h*.56+Math.sin(x/15)*12});
+    drawStroke(g,{pts,style:'hand',texture:'glitter',color:'#F6D24A',w:3.4,glow:true,seed:5});
+    const st=(type,x,y,s,color)=>drawSticker(g,{type,x,y,s,rot:0,color,glow:true,texture:'smooth'},false);
+    st('star',w*.16,h*.26,13,'#F6D24A');st('heart',w*.82,h*.27,12,'#F28BB5');st('sparkle',w*.5,h*.22,10,'#FFFFFF');st('flower',w*.68,h*.84,10,'#9CC9F2');st('paw',w*.3,h*.85,10,'#F28BB5');
+  });
+}
+function pickPhoto(m){pendingMode=m;$('#file').click()}
+$$('.mode').forEach(b=>b.onclick=()=>pickPhoto(b.dataset.mode));
+$$('[data-sample]').forEach(b=>b.onclick=()=>{sample(b.dataset.sample);hasPhoto=false;photoBlob=null;freshWork(b.dataset.sample);
+  if(b.dataset.sample==='doodle')sampleDoodles();$('#badge').hidden=false;goStep('crop')});
+$('#resume').onclick=()=>goStep(savedStep);
+$('#repick').onclick=()=>pickPhoto(mode);
+$('#back').onclick=()=>goStep(step==='crop'?'home':STEPS[STEPS.indexOf(step)-1]);
+$('#next').onclick=()=>step==='frame'?exportImage():goStep(STEPS[STEPS.indexOf(step)+1]);
+$$('#steps button').forEach(b=>b.onclick=()=>goStep(b.dataset.step));
 $('#file').onchange=async e=>{
   const f=e.target.files[0];e.target.value='';if(!f)return;
   const url=URL.createObjectURL(f);
   try{const img=await loadImage(url);await usePhoto(img);
-    photoBlob=await new Promise(r=>photo.toBlob(r,'image/jpeg',.92));
-    V=null;V=defaultView();items=[];undoStack=[];sel=null;zoom={z:1,x:0,y:0};hasPhoto=true;
-    // keep the black-and-white look only if the person is working in the colour-keep tool right now
-    const keeping=S.tool==='keep';K.on=K.on&&keeping;
-    $('#badge').hidden=true;syncCropUI();syncKeepUI();syncFrameUI();renderColors();applyView();scheduleSave();
-    status(keeping?'照片放好了，點照片上的顏色來選取要保留的部分':'照片放好了，想先轉正或裁切可以點「裁切」，想黑白留色可以點「留色」',3200);
+    photoBlob=await new Promise(r=>photo.toBlob(r,'image/jpeg',.92));hasPhoto=true;
+    freshWork(pendingMode);$('#badge').hidden=true;goStep('crop');
   }catch(err){status('這張照片打不開，換一張試試',3000)}finally{URL.revokeObjectURL(url)}
 };
 let outUrl=null,outFile=null;
-$('#save').onclick=async()=>{
+async function exportImage(){
   const o=outSize(),c=document.createElement('canvas');c.width=o.w;c.height=o.h;renderScene(c.getContext('2d'));
   const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.93));if(!blob){status('存圖失敗，請再試一次');return}
   const d=new Date(),p=n=>String(n).padStart(2,'0'),name=`keepsake-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.jpg`;
@@ -951,12 +1021,12 @@ $('#save').onclick=async()=>{
   let canShare=false;try{canShare=!!(navigator.canShare&&navigator.canShare({files:[outFile]}))}catch(e){}
   $('#out').src=outUrl;$('#download').href=outUrl;$('#download').download=name;$('#share').hidden=!canShare;
   $('#sheet').hidden=false;
-};
+}
 $('#share').onclick=()=>{navigator.share({files:[outFile]}).catch(e=>{if(e&&e.name!=='AbortError')status('分享沒有成功，可以改用「下載圖片」或長按圖片儲存',3500)})};
 $('#close').onclick=()=>$('#sheet').hidden=true;
 
 /* ---------- sample scene (drawn in code, no photo) ---------- */
-function sample(){
+function sample(m){
   photo.width=900;photo.height=1300;const c=pctx,r=rng(42);
   c.fillStyle='#2b2a2e';c.fillRect(0,0,900,1300);
   for(let i=0;i<14000;i++){c.fillStyle=r()<.5?'rgba(255,255,255,.07)':'rgba(0,0,0,.28)';const s=1+r()*2.5;c.fillRect(r()*900,r()*1300,s,s)}
@@ -974,8 +1044,10 @@ function sample(){
     c.fillStyle='rgba(150,90,30,.55)';for(let i=0;i<70;i++){const a=i*2.4,d=Math.sqrt(i/70)*R*.34;c.beginPath();c.arc(x+Math.cos(a)*d,y+Math.sin(a)*d,2.2,0,7);c.fill()}
   }
   V=defaultView();KD=null;kKey='';
-  // demo both halves: sunflower yellow kept in colour, everything else black and white
-  K={on:true,con:110,active:0,colors:[{h:44,rgb:[246,196,52],p:{...KDEF}}]};
+  // 留色 demo: sunflower yellow already kept so the effect shows right away
+  if(m==='keep')K={on:true,con:110,active:0,colors:[{h:44,rgb:[246,196,52],p:{...KDEF}}]};
+}
+function sampleDoodles(){
   const loop=[],n=noise1(9);for(let t=0;t<=1.02;t+=.008){const a=-Math.PI*.62+t*Math.PI*1.9,k=1+n(t*6)*.08;loop.push({x:470+Math.cos(a)*330*k,y:610+Math.sin(a)*390*k})}
   const Y='#F6D24A',st=(type,x,y,s,rot)=>({kind:'sticker',id:nextId++,type,x,y,s,rot,color:Y,glow:true,texture:'smooth'});
   items=[{kind:'stroke',id:nextId++,pts:loop,style:'wavy',texture:'glitter',color:Y,w:7.8,glow:true,seed:3},
@@ -991,11 +1063,11 @@ function sample(){
     const d=await DB.get('draft');
     if(d?.photo){const url=URL.createObjectURL(d.photo);const img=await loadImage(url);URL.revokeObjectURL(url);await usePhoto(img);
       photoBlob=d.photo;items=d.items||[];V=d.V;hasPhoto=true;restored=true;
-      if(d.K)K=d.K;if(d.FR)FR={...FR,...d.FR};nextId=Math.max(0,...items.map(i=>i.id||0))+1;$('#badge').hidden=true}
+      if(d.K)K=d.K;if(d.FR)FR={...FR,...d.FR};mode=d.mode||(K.on?'keep':'doodle');savedStep=d.step||'edit';
+      nextId=Math.max(0,...items.map(i=>i.id||0))+1}
   }catch(e){}
-  if(!restored)sample();
-  syncUI();setTool('draw');applyView();
-  if(restored)status('已還原上次的編輯，換照片會開始新的作品',3200);
+  if(!restored){sample('doodle');V=defaultView()}
+  syncUI();setTool(mode==='keep'?'keep':'draw');goStep('home');drawModeCards();
   if(document.fonts){Promise.all(FONTS.map(F=>document.fonts.load(`${F.w} 40px ${F.fam}`,'花Aa今天#0123456789ABCDEF'))).then(()=>{refreshPreviews();rebuild()}).catch(()=>{});
     const texts=items.filter(i=>i.kind==='text');Promise.all(texts.map(t=>document.fonts.load(fontStr(t),t.text))).then(()=>rebuild()).catch(()=>{})}
 })();
